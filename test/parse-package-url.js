@@ -5,7 +5,7 @@ var parseURL = require('../utils/parse-package-url');
 
 describe('parse package url', function() {
   it('should parse one package with version', function() {
-    var packages = parseURL('foo@4.2.1');
+    var packages = parseURL('foo@4.2.1', 'js');
     expect(packages.length).to.eq(1);
     expect(packages[0].name).to.eq('foo');
     expect(packages[0].version).to.eq('4.2.1');
@@ -14,7 +14,7 @@ describe('parse package url', function() {
   });
 
   it('should parse one package with no version', function() {
-    var packages = parseURL('foo');
+    var packages = parseURL('foo', 'js');
     expect(packages.length).to.eq(1);
     expect(packages[0].name).to.eq('foo');
     expect(packages[0].version).to.eq('*');
@@ -23,7 +23,7 @@ describe('parse package url', function() {
   });
 
   it('should parse two packages', function() {
-    var packages = parseURL('foo@3,bar@1.2');
+    var packages = parseURL('foo@3,bar@1.2', 'js');
     expect(packages.length).to.eq(2);
     expect(packages[0].name).to.eq('foo');
     expect(packages[0].version).to.eq('3');
@@ -36,12 +36,13 @@ describe('parse package url', function() {
   });
 
   it('should parse package with version and files', function() {
-    var packages = parseURL('foo@3|bar.js;lib/index.js');
+    var packages = parseURL('foo@3|bar;lib/index.js;lib/qar', 'js');
     expect(packages.length).to.eq(1);
     expect(packages[0].name).to.eq('foo');
     expect(packages[0].version).to.eq('3');
-    expect(packages[0].files.length).to.eq(2);
+    expect(packages[0].files.length).to.eq(3);
     expect(packages[0].files[0]).to.eq('bar.js');
     expect(packages[0].files[1]).to.eq('lib/index.js');
+    expect(packages[0].files[2]).to.eq('lib/qar.js');
   });
 });
