@@ -1,6 +1,7 @@
 {
   "name": "ung-server",
   "version": "0.0.0",
+  "private": true,
   "description": "Ung package manager server.",
   "main": "index.js",
   "scripts": {
@@ -26,5 +27,16 @@
   "homepage": "https://github.com/zkochan/ung-server#readme",
   "publishConfig": {
     "registry": "http://registry.npmjs.org"
+  },
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "chalk": "^1.1.1",
+    "connect": "^3.4.0",
+    "dir-packer": "^0.1.0",
+    "formidable": "^1.0.17",
+    "mkdirp": "^0.5.1",
+    "serve-static": "^1.10.0",
+    "write-yaml": "^0.2.2",
+    "yaml-or-json": "^0.1.0"
   }
 }
