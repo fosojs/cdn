@@ -36,6 +36,7 @@
     "formidable": "^1.0.17",
     "mkdirp": "^0.5.1",
     "ramda": "^0.18.0",
+    "semver": "^5.1.0",
     "serve-static": "^1.10.0",
     "write-yaml": "^0.2.2",
     "yaml-or-json": "^0.1.0"
