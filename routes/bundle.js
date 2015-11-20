@@ -11,9 +11,9 @@ module.exports = function(destPath) {
   return function(req, res) {
     var url = req.url.substr(1);
     var bundleURL = parseExt(url);
-    var bundles = yamlOrJSON(path.join(destPath, './bundles.' + bundleURL.ext));
+    var bundles = yamlOrJSON(path.join(destPath, './bundles'));
 
-    var packages = parsePackageURL(bundles[bundleURL.path], bundleURL.ext);
+    var packages = parsePackageURL(bundles[url], bundleURL.ext);
     var bundle = readPackages(destPath, packages);
 
     res.writeHead(200, {'content-type': extContentType[bundleURL.ext]});

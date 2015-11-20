@@ -5,20 +5,22 @@ var readPackages = require('../utils/read-packages');
 var yamlOrJSON = require('yaml-or-json');
 var path = require('path');
 var yaml = require('write-yaml');
+var parseExt = require('../utils/parse-ext');
 
 module.exports = function(destPath) {
   return function(req, res) {
     var data = req.body;
-    var pathToBnr = path.join(destPath, './bnr');
+    var bundle = parseExt(data.bundle);
+    var pathToBnr = path.join(destPath, './bundles');
     var bnr = yamlOrJSON(pathToBnr);
-    var packages = parsePackageURL(bnr[data.bundle]);
+    var packages = parsePackageURL(bnr[data.bundle], bundle.ext);
 
     var pkgDict = {};
     packages.forEach(function(pkg) {
       pkgDict[pkg.name] = pkg.version;
     });
 
-    var newPackages = parsePackageURL(data.packages.join(','));
+    var newPackages = parsePackageURL(data.packages.join(','), bundle.ext);
     newPackages.forEach(function(pkg) {
       pkgDict[pkg.name] = pkg.version;
     });
@@ -30,7 +32,7 @@ module.exports = function(destPath) {
 
     bnr[data.bundle] = newParts.join(',');
 
-    yaml.sync(pathToBnr + '.yaml', bnr);
+    yaml.sync(pathToBnr + '.yml', bnr);
 
     res.writeHead(200, {'content-type': 'text/plain'});
     res.write('Successfully pushed');
