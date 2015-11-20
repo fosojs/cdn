@@ -36,7 +36,7 @@ describe('parse package url', function() {
   });
 
   it('should parse package with version and files', function() {
-    var packages = parseURL('foo@3|bar;lib/index.js;lib/qar', 'js');
+    var packages = parseURL('foo@3!bar;lib/index.js;lib/qar', 'js');
     expect(packages.length).to.eq(1);
     expect(packages[0].name).to.eq('foo');
     expect(packages[0].version).to.eq('3');

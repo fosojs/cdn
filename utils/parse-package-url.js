@@ -21,8 +21,8 @@ function parse(url, fileExt) {
 
   var packageNames = url.split(',');
   var packages = packageNames.map(function(pn) {
-    if (pn.indexOf('|') !== -1) {
-      var parts = pn.split('|');
+    if (pn.indexOf('!') !== -1) {
+      var parts = pn.split('!');
       var filesPart = parts[1];
       return R.merge(parseNameVersion(parts[0]), {
         files: filesPart.split(';').map(function(filePath) {
