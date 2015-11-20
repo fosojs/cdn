@@ -10,6 +10,8 @@ var parseExt = require('../utils/parse-ext');
 module.exports = function(destPath) {
   return function(req, res) {
     var data = req.body;
+    data.deletePackages = data.deletePackages || [];
+
     var bundle = parseExt(data.bundle);
     var pathToBnr = path.join(destPath, './bundles');
     var bnr = yamlOrJSON(pathToBnr);
@@ -17,13 +19,17 @@ module.exports = function(destPath) {
 
     var pkgDict = {};
     packages.forEach(function(pkg) {
-      pkgDict[pkg.name] = pkg.version;
+      if (data.deletePackages.indexOf(pkg.name) === -1) {
+        pkgDict[pkg.name] = pkg.version;
+      }
     });
 
-    var newPackages = parsePackageURL(data.packages.join(','), bundle.ext);
-    newPackages.forEach(function(pkg) {
-      pkgDict[pkg.name] = pkg.version;
-    });
+    if (data.packages.length) {
+      var newPackages = parsePackageURL(data.packages.join(','), bundle.ext);
+      newPackages.forEach(function(pkg) {
+        pkgDict[pkg.name] = pkg.version;
+      });
+    }
 
     var newParts = [];
     for (var pkgName in pkgDict) {
