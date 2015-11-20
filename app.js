@@ -9,22 +9,17 @@ var postPublishFile = require('./routes/publish-file');
 var packages = require('./routes/packages');
 var bundle = require('./routes/bundle');
 var push = require('./routes/push');
-
-var destPath = './files';
-var opts = {
-  port: '9595',
-  ip: 'localhost'
-};
+var config = require('./config');
 
 var app = connect();
-app.use(serveStatic(destPath));
-app.use('/publish', postPublish(destPath));
-app.use('/publish-file', postPublishFile(destPath));
-app.use('/packages', packages(destPath));
-app.use('/bundle', bundle(destPath));
+app.use(serveStatic(config.storagePath));
+app.use('/publish', postPublish(config.storagePath));
+app.use('/publish-file', postPublishFile(config.storagePath));
+app.use('/packages', packages(config.storagePath));
+app.use('/bundle', bundle(config.storagePath));
 app.use('/push', bodyParser.json());
-app.use('/push', push(destPath));
-http.createServer(app).listen(opts.port, opts.ip, function(err) {
+app.use('/push', push(config.storagePath));
+http.createServer(app).listen(config.port, config.ip, function(err) {
   if (err) {
     console.log(err);
     return;
@@ -33,7 +28,7 @@ http.createServer(app).listen(opts.port, opts.ip, function(err) {
   console.log('--------------------------------------');
   console.log('');
   console.log('  Ung server started');
-  console.log('  Hosted on http://localhost:' + opts.port);
+  console.log('  Hosted on http://localhost:' + config.port);
   console.log('  Press Ctrl+C to stop the server');
   console.log('');
   console.log('--------------------------------------');

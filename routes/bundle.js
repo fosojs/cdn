@@ -13,7 +13,7 @@ module.exports = function(destPath) {
     var packages = parsePackageURL(bnr[bundleName]);
     var bundle = readPackages(destPath, packages);
 
-    res.writeHead(200, {'content-type': 'text/plain'});
+    res.writeHead(200, {'content-type': 'text/javascript'});
     res.write(bundle);
     res.end();
   };

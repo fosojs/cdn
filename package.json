@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zkochan/ung-server.git"
+    "url": "git+https://github.com/ungjs/ung-server.git"
   },
   "keywords": [
     "package",
@@ -22,9 +22,9 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zkochan/ung-server/issues"
+    "url": "https://github.com/ungjs/ung-server/issues"
   },
-  "homepage": "https://github.com/zkochan/ung-server#readme",
+  "homepage": "https://github.com/ungjs/ung-server#readme",
   "publishConfig": {
     "registry": "http://registry.npmjs.org"
   },
