@@ -17,13 +17,11 @@ function unpack(file, opts) {
     throw new Error('opts.version is required');
   }
 
-  var packPath = file.path;
-
   console.log('Received package ' + opts.name);
 
   var dest = path.join(opts.destPath, opts.name, opts.version);
 
-  packer.unpack(packPath, dest)
+  packer.unpack(file.path, dest)
     .then(function() {
       console.log(chalk.magenta(opts.name + '@' + opts.version) + ' published');
     })
