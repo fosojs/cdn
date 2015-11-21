@@ -4,6 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var getPackageVersions = require('./get-package-versions');
 var semver = require('semver');
+var config = require('../config');
 
 function getMatchingVersion(pkgName, versionPattern) {
   var versions = getPackageVersions(pkgName);
@@ -15,13 +16,13 @@ function getMatchingVersion(pkgName, versionPattern) {
 }
 
 module.exports = function(destPath, packages) {
-  var bundle = 'window.ungPackages = window.ungPackages || {};';
+  var bundle = 'window.ung=window.ung||{};ung.packages=ung.packages||{};ung.origin="' + config.ip + ':' + config.port + '"';
   packages.forEach(function(pkg) {
     var matchingVersion = getMatchingVersion(pkg.name, pkg.version);
     if (!matchingVersion) {
       throw new Error('No matching version found');
     }
-    bundle += ';ungPackages["' + pkg.name + '"]="' + matchingVersion + '";';
+    bundle += ';ung.packages["' + pkg.name + '"]={version:"' + matchingVersion + '"};';
     var pkgPath = path.join(destPath, pkg.name, matchingVersion);
     pkg.files.forEach(function(relativeFilePath) {
       var filePath = path.join(pkgPath, relativeFilePath);
