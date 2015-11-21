@@ -2,7 +2,7 @@
 
 var fs = require('fs');
 var path = require('path');
-var config = require('../config');
+var config = require('../../config');
 var semver = require('semver');
 
 function getPackageVersions(packageName) {

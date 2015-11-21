@@ -10,8 +10,6 @@ var sharedOptions = { storagePath: config.storagePath };
 server.register([
   { register: require('./app/bundle'), options: sharedOptions },
   { register: require('./app/publish'), options: sharedOptions },
-  { register: require('./app/publish-file'), options: sharedOptions },
-  { register: require('./app/packages'), options: sharedOptions },
   { register: require('./app/push'), options: sharedOptions },
 ], function(err) {
   if (err) {

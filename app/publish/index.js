@@ -1,8 +1,9 @@
 'use strict';
 
+var fs = require('fs');
 var path = require('path');
 var mkdirp = require('mkdirp');
-var unpack = require('../utils/unpack');
+var unpack = require('./unpack');
 
 exports.register = function(server, opts, next) {
   var tmpPath = path.join(opts.storagePath, './tmp');
@@ -27,6 +28,27 @@ exports.register = function(server, opts, next) {
       });
 
       return reply('received upload').type('text/plain');
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/publish-file',
+    handler: function(req, reply) {
+      if (!req.payload.fileName) {
+        throw new Error('fileName is required');
+      }
+
+      var filePath = path.join(opts.storagePath, req.payload.fileName);
+      fs.writeFile(filePath, req.payload.content, function(err) {
+        if (err) {
+          return console.log(err);
+        }
+
+        console.log('The file was saved!');
+
+        return reply('received file').type('text/plain');
+      });
     }
   });
 

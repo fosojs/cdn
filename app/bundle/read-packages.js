@@ -4,7 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var getPackageVersions = require('./get-package-versions');
 var semver = require('semver');
-var config = require('../config');
+var config = require('../../config');
 
 function getMatchingVersion(pkgName, versionPattern) {
   var versions = getPackageVersions(pkgName);

@@ -1,11 +1,10 @@
 'use strict';
 
-var parsePackageURL = require('../utils/parse-package-url');
-var readPackages = require('../utils/read-packages');
+var parsePackageURL = require('../../utils/parse-package-url');
 var yamlOrJSON = require('yaml-or-json');
 var path = require('path');
 var yaml = require('write-yaml');
-var parseExt = require('../utils/parse-ext');
+var parseExt = require('../../utils/parse-ext');
 
 exports.register = function(server, opts, next) {
   server.route({
