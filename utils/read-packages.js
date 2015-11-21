@@ -16,7 +16,7 @@ function getMatchingVersion(pkgName, versionPattern) {
 }
 
 module.exports = function(destPath, packages) {
-  var bundle = 'window.ung=window.ung||{};ung.packages=ung.packages||{};ung.origin="' + config.ip + ':' + config.port + '"';
+  var bundle = 'window.ung=window.ung||{skippedPackages:[]};ung.packages=ung.packages||{};ung.origin="' + config.ip + ':' + config.port + '"';
   packages.forEach(function(pkg) {
     var matchingVersion = getMatchingVersion(pkg.name, pkg.version);
     if (!matchingVersion) {
@@ -26,7 +26,9 @@ module.exports = function(destPath, packages) {
     var pkgPath = path.join(destPath, pkg.name, matchingVersion);
     pkg.files.forEach(function(relativeFilePath) {
       var filePath = path.join(pkgPath, relativeFilePath);
+      bundle += 'if (ung.skippedPackages.indexOf("' + pkg.name + '") === -1) {';
       bundle += fs.readFileSync(filePath, {encoding: 'utf-8'});
+      bundle += '}';
     });
   });
   return bundle;
