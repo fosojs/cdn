@@ -42,7 +42,9 @@ exports.register = function(server, opts, next) {
 
       yaml.sync(pathToBnr + '.yml', bnr);
 
-      return reply('Successfully pushed').type('text/plain');
+      return reply({
+        message: 'Successfully pushed'
+      });
     }
   });
 

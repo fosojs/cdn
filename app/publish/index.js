@@ -27,7 +27,9 @@ exports.register = function(server, opts, next) {
         destPath: opts.storagePath
       });
 
-      return reply('received upload').type('text/plain');
+      return reply({
+        message: 'received upload'
+      });
     }
   });
 
@@ -47,7 +49,9 @@ exports.register = function(server, opts, next) {
 
         console.log('The file was saved!');
 
-        return reply('received file').type('text/plain');
+        return reply({
+          message: 'received file'
+        });
       });
     }
   });
