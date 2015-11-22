@@ -11,27 +11,40 @@ exports.register = function(server, opts, next) {
     css: 'text/css'
   };
 
+  function pathsToPkgs(paths, extension) {
+    var packages = [];
+    paths.forEach(function(path) {
+      if (typeof path === 'object') {
+        packages.push(path);
+        return;
+      }
+      packages = packages.concat(referenceToPkgs(path, extension));
+    });
+    return packages;
+  }
+
+  function referenceToPkgs(refName, extension) {
+    var referencePackages = refService.get(refName + '.' + extension);
+    return pathsToPkgs(referencePackages, extension);
+  }
+
+  function bundleToPkgs(bundle) {
+    var packages = pathsToPkgs(bundle.paths, bundle.extension);
+    packages.forEach(function(pkg) {
+      if (!pkg.files || !pkg.files.length) {
+        pkg.files = ['index.' + bundle.extension];
+      }
+    });
+    return packages;
+  }
+
   server.route({
     method: 'GET',
     path: '/bundle/{bundleRoute*}',
     handler: function(req, reply) {
       var bundle = parseBundleRoute(req.params.bundleRoute);
 
-      var packages = [];
-      bundle.paths.forEach(function(path) {
-        if (typeof path === 'object') {
-          packages.push(path);
-          return;
-        }
-        var referenceName = path + '.' + bundle.extension;
-        var referencePackages = refService.get(referenceName);
-        packages = packages.concat(referencePackages);
-      });
-      packages.forEach(function(pkg) {
-        if (!pkg.files || !pkg.files.length) {
-          pkg.files = ['index.' + bundle.extension];
-        }
-      });
+      var packages = bundleToPkgs(bundle);
 
       bundle.content = server.plugins['bundle-service'].get(packages);
       reply(bundle.content).type(extContentType[bundle.extension]);

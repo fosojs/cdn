@@ -1,47 +1,25 @@
 'use strict';
 
 var parseExt = require('./parse-ext');
+var parsePackageRoute = require('./parse-package-route');
 var R = require('ramda');
 
-function parsePath(url, fileExt) {
+function parsePath(url, extension) {
   if (!url) {
     throw new Error('url is required');
   }
-  if (!fileExt) {
-    throw new Error('fileExt is required');
+  if (!extension) {
+    throw new Error('extension is required');
   }
 
-  function parseNameVersion(nv) {
-    var parts = nv.split('@');
-    return {
-      name: parts[0],
-      version: parts[1] || '*',
-      files: ['index.' + fileExt]
-    };
-  }
-
-  var packageNames = url.split(',');
-  var packages = packageNames.map(function(pn) {
-    if (pn.startsWith('@')) {
-      return pn.substr(1);
-    }
-    if (pn.indexOf('!') !== -1) {
-      var parts = pn.split('!');
-      var filesPart = parts[1];
-      return R.merge(parseNameVersion(parts[0]), {
-        files: filesPart.split(';').map(function(filePath) {
-          var end = '.' + fileExt;
-          return filePath.endsWith(end) ? filePath : filePath + end;
-        })
-      });
-    }
-    return parseNameVersion(pn);
-  });
+  var packageRoutes = url.split(',');
+  var packages = R.map(R.partialRight(parsePackageRoute, [extension]),
+    packageRoutes);
 
   return packages;
 }
 
-function parse(route) {
+function parseBundleRoute(route) {
   var parts = parseExt(route);
   return {
     paths: parsePath(parts.path, parts.ext),
@@ -49,4 +27,4 @@ function parse(route) {
   };
 }
 
-module.exports = parse;
+module.exports = parseBundleRoute;

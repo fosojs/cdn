@@ -1,6 +1,6 @@
 'use strict';
 
-var parseBundleRoute = require('../../utils/parse-bundle-route');
+var parsePackageRoute = require('../../utils/parse-package-route');
 var parseExt = require('../../utils/parse-ext');
 
 exports.register = function(server, opts, next) {
@@ -22,8 +22,8 @@ exports.register = function(server, opts, next) {
       });
 
       if (data.packages.length) {
-        var newPackages = parseBundleRoute(data.packages.join(',') + '.' + bundle.ext);
-        newPackages.paths.forEach(function(pkg) {
+        data.packages.forEach(function(packageRoute) {
+          var pkg = parsePackageRoute(packageRoute, bundle.ext);
           pkgDict[pkg.name] = pkg;
         });
       }
