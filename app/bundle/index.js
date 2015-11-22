@@ -10,24 +10,26 @@ var parseExt = require('../../utils/parse-ext');
 exports.register = function(server, opts, next) {
   server.route({
     method: 'GET',
-    path: '/bundle/{name}.{extension}',
-    handler: function(req, reply) {
-      var bundles = yamlOrJSON(path.join(opts.storagePath, './bundles'));
-
-      var bundleName = req.params.name + '.' + req.params.extension;
-      var packages = parsePackageURL(bundles[bundleName], req.params.extension);
-      var bundle = readPackages(opts.storagePath, packages);
-
-      return reply(bundle).type(extContentType[req.params.extension]);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/packages/{packagesURL*}',
+    path: '/bundle/{packagesURL*}',
     handler: function(req, reply) {
       var bundleName = parseExt(req.params.packagesURL);
-      var packages = parsePackageURL(bundleName.path, bundleName.ext);
+      var refs = parsePackageURL(bundleName.path, bundleName.ext);
+
+      var namedBundles = yamlOrJSON(path.join(opts.storagePath, './bundles'));
+      var packages = [];
+      refs.forEach(function(ref) {
+        if (typeof ref === 'object') {
+          packages.push(ref);
+          return;
+        }
+        packages = packages.concat(namedBundles[ref + '.' + bundleName.ext]);
+      });
+      packages.forEach(function(pkg) {
+        if (!pkg.files || !pkg.files.length) {
+          pkg.files = ['index.' + bundleName.ext];
+        }
+      });
+
       var bundle = readPackages(opts.storagePath, packages);
       return reply(bundle).type(extContentType[bundleName.ext]);
     }

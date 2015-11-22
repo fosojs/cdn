@@ -21,6 +21,9 @@ function parse(url, fileExt) {
 
   var packageNames = url.split(',');
   var packages = packageNames.map(function(pn) {
+    if (pn.startsWith('@')) {
+      return pn.substr(1);
+    }
     if (pn.indexOf('!') !== -1) {
       var parts = pn.split('!');
       var filesPart = parts[1];

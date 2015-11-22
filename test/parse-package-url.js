@@ -45,4 +45,18 @@ describe('parse package url', function() {
     expect(packages[0].files[1]).to.eq('lib/index.js');
     expect(packages[0].files[2]).to.eq('lib/qar.js');
   });
+
+  it('should parse named bundle', function() {
+    var packages = parseURL('@foo', 'js');
+    expect(packages.length).to.eq(1);
+    expect(packages[0]).to.eq('foo');
+  });
+
+  it('should parse named bundle and package', function() {
+    var packages = parseURL('@foo,bar', 'js');
+    expect(packages.length).to.eq(2);
+    expect(packages[0]).to.eq('foo');
+    expect(packages[1].name).to.eq('bar');
+    expect(packages[1].version).to.eq('*');
+  });
 });

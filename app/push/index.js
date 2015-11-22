@@ -17,28 +17,28 @@ exports.register = function(server, opts, next) {
       var bundle = parseExt(data.bundle);
       var pathToBnr = path.join(opts.storagePath, './bundles');
       var bnr = yamlOrJSON(pathToBnr);
-      var packages = parsePackageURL(bnr[data.bundle], bundle.ext);
+      var packages = bnr[data.bundle];
 
       var pkgDict = {};
       packages.forEach(function(pkg) {
         if (data.deletePackages.indexOf(pkg.name) === -1) {
-          pkgDict[pkg.name] = pkg.version;
+          pkgDict[pkg.name] = pkg;
         }
       });
 
       if (data.packages.length) {
         var newPackages = parsePackageURL(data.packages.join(','), bundle.ext);
         newPackages.forEach(function(pkg) {
-          pkgDict[pkg.name] = pkg.version;
+          pkgDict[pkg.name] = pkg;
         });
       }
 
       var newParts = [];
       for (var pkgName in pkgDict) {
-        newParts.push(pkgName + '@' + pkgDict[pkgName]);
+        newParts.push(pkgDict[pkgName]);
       }
 
-      bnr[data.bundle] = newParts.join(',');
+      bnr[data.bundle] = newParts;
 
       yaml.sync(pathToBnr + '.yml', bnr);
 
