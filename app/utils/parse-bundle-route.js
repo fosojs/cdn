@@ -1,8 +1,9 @@
 'use strict';
 
+var parseExt = require('./parse-ext');
 var R = require('ramda');
 
-function parse(url, fileExt) {
+function parsePath(url, fileExt) {
   if (!url) {
     throw new Error('url is required');
   }
@@ -38,6 +39,14 @@ function parse(url, fileExt) {
   });
 
   return packages;
+}
+
+function parse(route) {
+  var parts = parseExt(route);
+  return {
+    paths: parsePath(parts.path, parts.ext),
+    extension: parts.ext
+  };
 }
 
 module.exports = parse;

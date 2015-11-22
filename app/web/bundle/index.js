@@ -1,9 +1,11 @@
 'use strict';
 
-var parsePackageURL = require('../../utils/parse-package-url');
+var parseBundleRoute = require('../../utils/parse-bundle-route');
 var parseExt = require('../../utils/parse-ext');
 
 exports.register = function(server, opts, next) {
+  var refService = server.plugins['reference-service'];
+
   var extContentType = {
     js: 'text/javascript',
     css: 'text/css'
@@ -11,29 +13,28 @@ exports.register = function(server, opts, next) {
 
   server.route({
     method: 'GET',
-    path: '/bundle/{packagesURL*}',
+    path: '/bundle/{bundleRoute*}',
     handler: function(req, reply) {
-      var bundleName = parseExt(req.params.packagesURL);
-      var paths = parsePackageURL(bundleName.path, bundleName.ext);
+      var bundle = parseBundleRoute(req.params.bundleRoute);
 
       var packages = [];
-      paths.forEach(function(path) {
+      bundle.paths.forEach(function(path) {
         if (typeof path === 'object') {
           packages.push(path);
           return;
         }
-        var referenceName = path + '.' + bundleName.ext;
-        var referencePackages = server.plugins['reference-service'].get(referenceName);
+        var referenceName = path + '.' + bundle.extension;
+        var referencePackages = refService.get(referenceName);
         packages = packages.concat(referencePackages);
       });
       packages.forEach(function(pkg) {
         if (!pkg.files || !pkg.files.length) {
-          pkg.files = ['index.' + bundleName.ext];
+          pkg.files = ['index.' + bundle.extension];
         }
       });
 
-      var bundle = server.plugins['bundle-service'].get(packages);
-      return reply(bundle).type(extContentType[bundleName.ext]);
+      bundle.content = server.plugins['bundle-service'].get(packages);
+      reply(bundle.content).type(extContentType[bundle.extension]);
     }
   });
 
