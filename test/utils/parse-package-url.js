@@ -1,7 +1,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var parseURL = require('../utils/parse-package-url');
+var parseURL = require('../../app/utils/parse-package-url');
 
 describe('parse package url', function() {
   it('should parse one package with version', function() {

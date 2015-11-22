@@ -6,8 +6,7 @@ var mkdirp = require('mkdirp');
 var unpack = require('./unpack');
 
 exports.register = function(server, opts, next) {
-  var tmpPath = path.join(opts.storagePath, './tmp');
-  mkdirp.sync(tmpPath);
+  mkdirp.sync(opts.tempPath);
 
   server.route({
     method: 'POST',
@@ -16,14 +15,13 @@ exports.register = function(server, opts, next) {
       payload: {
         output: 'file',
         maxBytes: 1048576 * 10, /* 10MB */
-        uploads: tmpPath
+        uploads: opts.tempPath
       }
     },
     handler: function(req, reply) {
       unpack(req.payload.file, {
         version: req.payload.version,
         name: req.payload.name,
-        tmpPath: tmpPath,
         destPath: opts.storagePath
       });
 

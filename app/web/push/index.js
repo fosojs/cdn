@@ -1,9 +1,6 @@
 'use strict';
 
 var parsePackageURL = require('../../utils/parse-package-url');
-var yamlOrJSON = require('yaml-or-json');
-var path = require('path');
-var yaml = require('write-yaml');
 var parseExt = require('../../utils/parse-ext');
 
 exports.register = function(server, opts, next) {
@@ -15,9 +12,7 @@ exports.register = function(server, opts, next) {
       data.deletePackages = data.deletePackages || [];
 
       var bundle = parseExt(data.bundle);
-      var pathToBnr = path.join(opts.storagePath, './bundles');
-      var bnr = yamlOrJSON(pathToBnr);
-      var packages = bnr[data.bundle];
+      var packages = server.plugins['reference-service'].get(data.bundle);
 
       var pkgDict = {};
       packages.forEach(function(pkg) {
@@ -38,9 +33,7 @@ exports.register = function(server, opts, next) {
         newParts.push(pkgDict[pkgName]);
       }
 
-      bnr[data.bundle] = newParts;
-
-      yaml.sync(pathToBnr + '.yml', bnr);
+      server.plugins['reference-service'].set(data.bundle, newParts);
 
       return reply({
         message: 'Successfully pushed'
@@ -52,5 +45,6 @@ exports.register = function(server, opts, next) {
 };
 
 exports.register.attributes = {
-  name: 'app/push'
+  name: 'app/push',
+  dependencies: ['reference-service']
 };

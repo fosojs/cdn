@@ -1,3 +1,4 @@
 port: 9595
 ip: localhost
 storagePath: ./files
+tempPath: ./files/tmp
