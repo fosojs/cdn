@@ -5,18 +5,22 @@ var yamlOrJSON = require('yaml-or-json');
 var yaml = require('write-yaml');
 
 exports.register = function(plugin, opts, next) {
-  var pathToBnr = path.join(opts.storagePath, './bundles');
+  var pathToRefs = path.join(opts.storagePath, './references');
 
   plugin.expose('get', function(name) {
-    var bnr = yamlOrJSON(pathToBnr);
-    var packages = bnr[name];
+    var refs = yamlOrJSON(pathToRefs);
+    var packages = refs[name];
     return packages;
   });
 
   plugin.expose('set', function(name, packages) {
-    var bnr = yamlOrJSON(pathToBnr);
-    bnr[name] = packages;
-    yaml.sync(pathToBnr + '.yml', bnr);
+    var refs = yamlOrJSON(pathToRefs);
+    if (packages.length) {
+      refs[name] = packages;
+    } else {
+      delete refs[name];
+    }
+    yaml.sync(pathToRefs + '.yml', refs);
   });
 
   next();

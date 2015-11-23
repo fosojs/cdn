@@ -14,9 +14,14 @@ exports.register = function(server, opts, next) {
       var bundle = parseExt(data.bundle);
       var packages = server.plugins['reference-service'].get(data.bundle);
 
+      if (!packages) {
+        packages = [];
+      }
+
       var pkgDict = {};
       packages.forEach(function(pkg) {
-        if (data.deletePackages.indexOf(pkg.name) === -1) {
+        if (typeof pkg === 'string' && data.deletePackages.indexOf(pkg) === -1 ||
+          typeof pkg === 'object' && data.deletePackages.indexOf(pkg.name) === -1) {
           pkgDict[pkg.name] = pkg;
         }
       });
