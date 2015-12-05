@@ -1,6 +1,8 @@
 # ung-server
 
-Ung package manager server.
+A webservice that dishes out files from npm packages.
+
+Inspired by [npm-cdn][https://github.com/zeke/npm-cdn], [wzrd.in][https://github.com/jfhbrook/wzrd.in] and [brcdn.org][https://github.com/ForbesLindesay/brcdn.org].
 
 
 ## Installation

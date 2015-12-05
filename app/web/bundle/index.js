@@ -61,19 +61,34 @@ exports.register = function(server, opts, next) {
     }, '');
   }
 
+  var bundleCache = server.cache({
+    cache: 'redisCache',
+    expiresIn: 1000 * 60 * 5,
+    generateFunc: function(id, next) {
+      var packages = bundleToPkgs(id);
+
+      server.plugins['bundle-service'].get(packages, function(err, pkgFiles) {
+        if (err) {
+          return next(null, null);
+        }
+        var content = bundleFiles(id.extension, pkgFiles);
+        next(null, content);
+      });
+    },
+    generateTimeout: 1000 * 10 /* 10 seconds */
+  });
+
   server.route({
     method: 'GET',
     path: '/bundle/{bundleRoute*}',
     handler: function(req, reply) {
       var bundle = parseBundleRoute(req.params.bundleRoute);
 
-      var packages = bundleToPkgs(bundle);
-
-      server.plugins['bundle-service'].get(packages, function(err, pkgFiles) {
-        if (err) {
+      bundle.id = req.params.bundleRoute;
+      bundleCache.get(bundle, function(err, content) {
+        if (err || !content) {
           return reply(Boom.notFound(err));
         }
-        var content = bundleFiles(bundle.extension, pkgFiles);
         reply(content).type(extContentType[bundle.extension]);
       });
     }

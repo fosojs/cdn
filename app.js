@@ -3,7 +3,16 @@
 var config = require('./config');
 var Hapi = require('hapi');
 
-var server = new Hapi.Server();
+var server = new Hapi.Server({
+  cache: [
+    {
+      name: 'redisCache',
+      engine: require('catbox-redis'),
+      host: '127.0.0.1',
+      partition: 'cache'
+    }
+  ]
+});
 server.connection({ port: config.port });
 
 server.register([
