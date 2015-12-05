@@ -97,7 +97,7 @@ Package.prototype.writeIndexFiles = function(callback) {
   callback(null);
 };
 
-Package.prototype.readFile = function(filename) {
+Package.prototype.streamFile = function(filename) {
   return new Promise(function(resolve, reject) {
     var self = this;
 
@@ -113,18 +113,31 @@ Package.prototype.readFile = function(filename) {
       }
 
       if (filename === 'package.json') {
-        return resolve(fs.readFileSync(file, {encoding: 'utf-8'}));
+        return resolve(fs.createReadStream(file));
       }
 
       if (self.json.icon && self.json.icon === filename) {
-        return resolve(fs.readFileSync(file, {encoding: 'utf-8'}));
+        return resolve(fs.createReadStream(file));
       }
 
       if (process.env.RESTRICTED_ACCESS) {
         return reject(new Error('I only serve package.json files and package icons these days.'));
       }
-      return resolve(fs.readFileSync(file, {encoding: 'utf-8'}));
+      return resolve(fs.createReadStream(file));
     });
+  }.bind(this));
+};
+
+Package.prototype.readFile = function(filename) {
+  return new Promise(function(resolve, reject) {
+    this.streamFile(filename)
+      .then(function(stream) {
+        stream.setEncoding('utf8');
+        var file = '';
+        stream.on('data', (chunk) => file += chunk);
+        stream.on('end', () => resolve(file));
+      })
+      .catch(reject);
   }.bind(this));
 };
 

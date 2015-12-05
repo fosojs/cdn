@@ -23,6 +23,7 @@ server.register([
     }
   },
   { register: require('./app/web/push') },
+  { register: require('./app/web/raw') }
 ], function(err) {
   if (err) {
     throw err;
