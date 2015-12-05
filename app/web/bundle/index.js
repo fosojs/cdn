@@ -46,8 +46,13 @@ exports.register = function(server, opts, next) {
 
       var packages = bundleToPkgs(bundle);
 
-      bundle.content = server.plugins['bundle-service'].get(packages);
-      reply(bundle.content).type(extContentType[bundle.extension]);
+      server.plugins['bundle-service'].get(packages, function(err, content) {
+        if (err) {
+          /* reply with error */
+          throw err;
+        }
+        reply(content).type(extContentType[bundle.extension]);
+      });
     }
   });
 

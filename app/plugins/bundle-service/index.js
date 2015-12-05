@@ -3,6 +3,8 @@
 var fs = require('fs');
 var path = require('path');
 var semver = require('semver');
+var Package = require('./package');
+var async = require('async');
 
 exports.register = function(plugin, opts, next) {
   if (!opts.storagePath) {
@@ -33,23 +35,31 @@ exports.register = function(plugin, opts, next) {
     }
   }
 
-  plugin.expose('get', function(packages) {
+  plugin.expose('get', function(packages, cb) {
     var bundle = 'window.ung=window.ung||{skippedPackages:[]};ung.packages=ung.packages||{};ung.origin="' + opts.resourcesHost + '"';
-    packages.forEach(function(pkg) {
-      var matchingVersion = getMatchingVersion(pkg.name, pkg.version);
+    async.each(packages, function(pkgMeta, cb) {
+      var matchingVersion = pkgMeta.version;//getMatchingVersion(pkg.name, pkg.version);
       if (!matchingVersion) {
         throw new Error('No matching version found');
       }
-      bundle += ';ung.packages["' + pkg.name + '"]={version:"' + matchingVersion + '"};';
-      var pkgPath = path.join(opts.storagePath, pkg.name, matchingVersion);
-      pkg.files.forEach(function(relativeFilePath) {
-        var filePath = path.join(pkgPath, relativeFilePath);
-        bundle += 'if (ung.skippedPackages.indexOf("' + pkg.name + '") === -1) {';
-        bundle += fs.readFileSync(filePath, {encoding: 'utf-8'});
-        bundle += '}';
+      bundle += ';ung.packages["' + pkgMeta.name + '"]={version:"' + matchingVersion + '"};';
+      var pkg = new Package(pkgMeta.name, pkgMeta.version, {
+        verbose: true
       });
+      var pkgPath = path.join(opts.storagePath, pkgMeta.name, matchingVersion);
+      async.each(pkgMeta.files, function(relativeFilePath, cb) {
+        pkg.readFile(relativeFilePath)
+          .then(function(file) {
+            bundle += 'if (ung.skippedPackages.indexOf("' + pkgMeta.name + '") === -1) {';
+            bundle += file;
+            bundle += '}';
+            cb();
+          })
+          .catch(cb);
+      }, cb);
+    }, function(err) {
+      cb(err, bundle);
     });
-    return bundle;
   });
 
   next();
