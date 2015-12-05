@@ -5,6 +5,10 @@ var parseExt = require('../../utils/parse-ext');
 var Boom = require('boom');
 
 exports.register = function(server, opts, next) {
+  if (!opts.resourcesHost) {
+    return next(new Error('opts.resourcesHost is required'));
+  }
+
   var refService = server.plugins['reference-service'];
 
   var extContentType = {
@@ -39,6 +43,24 @@ exports.register = function(server, opts, next) {
     return packages;
   }
 
+  function bundleFiles(type, pkgFiles) {
+    if (type === 'js') {
+      var bundle = 'window.ung=window.ung||{skippedPackages:[]};' +
+        'ung.packages=ung.packages||{};ung.origin="' + opts.resourcesHost + '"';
+      bundle += pkgFiles.reduce(function(memo, pkgFiles) {
+        return memo + ';ung.packages["' + pkgFiles.name +
+          '"]={version:"' + pkgFiles.version + '"};' +
+          'if (ung.skippedPackages.indexOf("' +
+          pkgFiles.name + '") === -1) {' +  pkgFiles.files.join('') +
+          '}';
+      }, '');
+      return bundle;
+    }
+    return pkgFiles.reduce(function(memo, pkgFiles) {
+      return memo + pkgFiles.files.join('');
+    }, '');
+  }
+
   server.route({
     method: 'GET',
     path: '/bundle/{bundleRoute*}',
@@ -47,10 +69,11 @@ exports.register = function(server, opts, next) {
 
       var packages = bundleToPkgs(bundle);
 
-      server.plugins['bundle-service'].get(packages, function(err, content) {
+      server.plugins['bundle-service'].get(packages, function(err, pkgFiles) {
         if (err) {
           return reply(Boom.notFound(err));
         }
+        var content = bundleFiles(bundle.extension, pkgFiles);
         reply(content).type(extContentType[bundle.extension]);
       });
     }

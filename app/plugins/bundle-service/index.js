@@ -7,43 +7,35 @@ var async = require('async');
 const registry = require('./registry');
 
 exports.register = function(plugin, opts, next) {
-  if (!opts.storagePath) {
-    return next(new Error('opts.storagePath is required'));
-  }
-  if (!opts.resourcesHost) {
-    return next(new Error('opts.resourcesHost is required'));
-  }
-
   plugin.expose('get', function(packages, cb) {
-    var bundle = 'window.ung=window.ung||{skippedPackages:[]};' +
-      'ung.packages=ung.packages||{};ung.origin="' + opts.resourcesHost + '"';
-    async.each(packages, function(pkgMeta, cb) {
+    async.series(packages.map((pkgMeta) => function(cb) {
       registry.resolve(pkgMeta.name, pkgMeta.version)
         .then(function(matchingVersion) {
           if (matchingVersion !== pkgMeta.version) {
             console.log(pkgMeta.name + '@' + pkgMeta.version + ' resolved to ' +
               pkgMeta.name + '@' + matchingVersion);
           }
-          bundle += ';ung.packages["' + pkgMeta.name +
-            '"]={version:"' + matchingVersion + '"};';
           var pkg = new Package(pkgMeta.name, matchingVersion, {
             verbose: true
           });
-          async.each(pkgMeta.files, function(relativeFilePath, cb) {
+          async.series(pkgMeta.files.map(relativeFilePath => function(cb) {
             pkg.readFile(relativeFilePath)
-              .then(function(file) {
-                bundle += 'if (ung.skippedPackages.indexOf("' +
-                  pkgMeta.name + '") === -1) {';
-                bundle += file;
-                bundle += '}';
-                cb();
-              })
+              .then(file => cb(null, file))
               .catch(cb);
-          }, cb);
+          }), function(err, files) {
+            if (err) {
+              return cb(err);
+            }
+            cb(null, {
+              name: pkgMeta.name,
+              version: matchingVersion,
+              files: files
+            });
+          });
         })
         .catch(cb);
-    }, function(err) {
-      cb(err, bundle);
+    }), function(err, packageFiles) {
+      cb(err, packageFiles);
     });
   });
 

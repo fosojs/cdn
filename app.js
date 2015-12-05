@@ -14,13 +14,14 @@ server.register([
     }
   },
   {
-    register: require('./app/plugins/bundle-service'),
+    register: require('./app/plugins/bundle-service')
+  },
+  {
+    register: require('./app/web/bundle'),
     options: {
-      storagePath: config.storagePath,
       resourcesHost: config.ip + ':' + config.port
     }
   },
-  { register: require('./app/web/bundle') },
   { register: require('./app/web/push') },
 ], function(err) {
   if (err) {
