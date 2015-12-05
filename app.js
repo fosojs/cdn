@@ -21,13 +21,6 @@ server.register([
     }
   },
   { register: require('./app/web/bundle') },
-  {
-    register: require('./app/web/publish'),
-    options: {
-      storagePath: config.storagePath,
-      tempPath: config.tempPath
-    }
-  },
   { register: require('./app/web/push') },
 ], function(err) {
   if (err) {
