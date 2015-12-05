@@ -2,6 +2,7 @@
 
 var parseBundleRoute = require('../../utils/parse-bundle-route');
 var parseExt = require('../../utils/parse-ext');
+var Boom = require('boom');
 
 exports.register = function(server, opts, next) {
   var refService = server.plugins['reference-service'];
@@ -48,8 +49,7 @@ exports.register = function(server, opts, next) {
 
       server.plugins['bundle-service'].get(packages, function(err, content) {
         if (err) {
-          /* reply with error */
-          throw err;
+          return reply(Boom.notFound(err));
         }
         reply(content).type(extContentType[bundle.extension]);
       });

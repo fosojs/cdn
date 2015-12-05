@@ -16,6 +16,8 @@
     "excludeFiles": [
         "test/data/**"
     ],
-    
-    "requirePaddingNewLinesAfterUseStrict": true
+
+    "requirePaddingNewLinesAfterUseStrict": true,
+
+    "requireCurlyBraces": ["do"]
 }
