@@ -11,7 +11,7 @@ module.exports = function(server, opts, next) {
       var pkg = {
         name: metaParts[0],
         version: metaParts[1] || 'latest',
-        file: req.params.path
+        file: req.params.path || '_index.html'
       };
 
       server.plugins['bundle-service'].getRaw(pkg, function(err, fileStream) {

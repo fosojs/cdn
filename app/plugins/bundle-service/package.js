@@ -6,6 +6,7 @@ const tar = require('tar-fs');
 const fs = require('fs');
 const path = require('path');
 const config = require('../../../config');
+const normalize = require('normalize-path');
 
 function Package(name, version, opts) {
   this.name = name;
@@ -15,7 +16,7 @@ function Package(name, version, opts) {
 
 Package.prototype = {
   get directory() {
-    return path.resolve(config.storagePath, this.name, this.version);
+    return normalize(path.resolve(config.storagePath, this.name, this.version));
   },
   get tarballURL() {
     return fmt('http://registry.npmjs.org/%s/-/%s-%s.tgz',
@@ -63,7 +64,8 @@ Package.prototype.buildFileTree = function(callback) {
   _this.log('building file tree');
 
   finder.on('file', function(file, stat) {
-    _this.files.push(file.replace(_this.directory + '/package/', ''));
+    _this.files.push(normalize(file)
+      .replace(_this.directory + '/package/', ''));
   });
 
   finder.on('end', function() {
