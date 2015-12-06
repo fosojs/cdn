@@ -36,14 +36,9 @@ When a package is downloaded, index files are generated in HTML and JSON format.
 * [/raw/browserify@8.1.1](http://cdn.foso.me/raw/browserify@8.1.1) renders an HTML page with links to all the files in the package.
 
 
-## Pushing packages to the registry
+## Accessing packages
 
-For pushing packages to the registry, the [ung-cli][] can be used.
-
-
-## Accessing the packages
-
-All the packages can be loaded through the `/bundle/{bundleRoute}` endpoint.
+Any npm package can be loaded through the `/bundle/{bundleRoute}` endpoint.
 The `bundleRoute` should end either with `.js` or `.css` and should contain a list
 of one or more `packageRoutes`. For example, `/bundle/foo,bar,baz.js` will return a JavaScript file that is a
 concatenation of the latest versions of `foo`, `bar`, `baz`.
@@ -64,6 +59,14 @@ By default, the `index.js` file of the package is loaded. However, it is possibl
 load any file of a package by specifying the path to it. E.g., to load the `collection/pluck.js`
 file of the [lodash](https://www.npmjs.com/package/lodash) package, this URL can be used: [/bundle/lodash@3.10.1!collection/pluck.js](http://cdn.foso.me/bundle/lodash@3.10.1!collection/pluck.js).
 It is also possible to load several files from a package: [/bundle/lodash@3.10.1!array/fill;collection/pluck.js](http://cdn.foso.me/bundle/lodash@3.10.1!array/fill;collection/pluck.js).
+
+
+### Minifying
+
+It is possible to minify the resources by accessing them through the `bundle.min` endpoint instead of `bundle`. For instance:
+
+* the non-minified bootstrap css file: [/bundle/bootstrap@3.3.6.css](http://cdn.foso.me/bundle/bootstrap@3.3.6.css)
+* the minified bootstrap css file: [/bundle.min/bootstrap@3.3.6.css](http://cdn.foso.me/bundle.min/bootstrap@3.3.6.css)
 
 
 ### Using references
