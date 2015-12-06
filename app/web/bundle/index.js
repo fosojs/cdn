@@ -62,7 +62,7 @@ exports.register = function(server, opts, next) {
   }
 
   var bundleCache = server.cache({
-    cache: 'redisCache',
+    //cache: 'redisCache',
     expiresIn: 1000 * 60 * 5,
     generateFunc: function(id, next) {
       var packages = bundleToPkgs(id);
