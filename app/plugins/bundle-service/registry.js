@@ -40,9 +40,9 @@ registry.metadata = function metadata(module, cb) {
 
 registry.resolve = function resolve(module, version) {
   return new Promise(function(resolve, reject) {
-    registry.versions(module, version, function(err, vs) {
+    registry.versions(module, version, function(err, v) {
       if (err) return reject(err);
-      resolve(vs[0]);
+      resolve(v);
     });
   }.bind(this));
 };
@@ -86,6 +86,6 @@ registry.versions = function versions(module, version, cb) {
       return cb(e);
     }
 
-    cb(null, v);
+    cb(null, data.versions[v[0]]);
   });
 };

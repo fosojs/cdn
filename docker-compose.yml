@@ -1,4 +1,4 @@
-ung2:
+ung:
   build: .
   volumes:
     - .:/src

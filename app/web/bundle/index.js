@@ -35,11 +35,11 @@ exports.register = function(server, opts, next) {
 
   function bundleToPkgs(bundle) {
     var packages = pathsToPkgs(bundle.paths, bundle.extension);
-    packages.forEach(function(pkg) {
+    /*packages.forEach(function(pkg) {
       if (!pkg.files || !pkg.files.length) {
         pkg.files = ['index.' + bundle.extension];
       }
-    });
+    });*/
     return packages;
   }
 
@@ -67,13 +67,14 @@ exports.register = function(server, opts, next) {
     generateFunc: function(id, next) {
       var packages = bundleToPkgs(id);
 
-      server.plugins['bundle-service'].get(packages, function(err, pkgFiles) {
-        if (err) {
-          return next(null, null);
-        }
-        var content = bundleFiles(id.extension, pkgFiles);
-        next(null, content);
-      });
+      server.plugins['bundle-service']
+        .get(packages, id.extension, function(err, pkgFiles) {
+          if (err) {
+            return next(null, null);
+          }
+          var content = bundleFiles(id.extension, pkgFiles);
+          next(null, content);
+        });
     },
     generateTimeout: 1000 * 10 /* 10 seconds */
   });

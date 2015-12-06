@@ -9,8 +9,7 @@ function parsePackageRoute(packageRoute, extension) {
     var parts = nv.split('@');
     return {
       name: parts[0],
-      version: parts[1] || '*',
-      files: ['index' + end]
+      version: parts[1] || '*'
     };
   }
 

@@ -1,24 +1,48 @@
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
-var Package = require('./package');
-var async = require('async');
+const fs = require('fs');
+const path = require('path');
+const Package = require('./package');
+const async = require('async');
 const registry = require('./registry');
 
 exports.register = function(plugin, opts, next) {
-  plugin.expose('get', function(packages, cb) {
+  const mainFields = {
+    js: 'main',
+    css: 'style'
+  };
+
+  plugin.expose('get', function(packages, extension, cb) {
     async.series(packages.map((pkgMeta) => function(cb) {
       registry.resolve(pkgMeta.name, pkgMeta.version)
-        .then(function(matchingVersion) {
-          if (matchingVersion !== pkgMeta.version) {
-            console.log(pkgMeta.name + '@' + pkgMeta.version + ' resolved to ' +
-              pkgMeta.name + '@' + matchingVersion);
+        .then(function(matchingPkg) {
+          if (!matchingPkg) {
+            console.log('No matching version found for', pkgMeta.name + '@' +
+              pkgMeta.version);
+            cb(new Error('no matching version found for ' + pkgMeta.name + '@' +
+              pkgMeta.version));
+            return;
           }
-          var pkg = new Package(pkgMeta.name, matchingVersion, {
+          if (matchingPkg.version !== pkgMeta.version) {
+            console.log(pkgMeta.name + '@' + pkgMeta.version + ' resolved to ' +
+              pkgMeta.name + '@' + matchingPkg.version);
+          }
+          var pkg = new Package(pkgMeta.name, matchingPkg.version, {
             verbose: true
           });
-          async.series(pkgMeta.files.map(relativeFilePath => function(cb) {
+          var files = pkgMeta.files;
+          if (!files || !files.length) {
+            let mainField = mainFields[extension];
+            console.log('File not specified. Loading main file:',
+              matchingPkg[mainField]);
+            let mainFile = matchingPkg[mainField];
+            let end = '.' + extension;
+            if (mainFile.indexOf(end) === -1) {
+              mainFile += end;
+            }
+            files = [mainFile];
+          }
+          async.series(files.map(relativeFilePath => function(cb) {
             pkg.readFile(relativeFilePath)
               .then(file => cb(null, file))
               .catch(cb);
@@ -28,7 +52,7 @@ exports.register = function(plugin, opts, next) {
             }
             cb(null, {
               name: pkgMeta.name,
-              version: matchingVersion,
+              version: matchingPkg.version,
               files: files
             });
           });
