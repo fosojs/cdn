@@ -61,9 +61,9 @@ the latest version of the `3`rd major version of `bar` and the latest version of
 ### Loading specific files
 
 By default, the `index.js` file of the package is loaded. However, it is possible to
-load any file of a package by specifying the path to it. E.g., to load the `lib/geometry.js`
-file of the `math` package, this URL can be used: `/bundle/math!lib/geometry.js`.
-It is also possible to load several files from a package: `/bundle/math@4.2.2!lib/geometry;lib/algebra.js`.
+load any file of a package by specifying the path to it. E.g., to load the `collection/pluck.js`
+file of the [lodash](https://www.npmjs.com/package/lodash) package, this URL can be used: [/bundle/lodash@3.10.1!collection/pluck.js](http://cdn.foso.me/bundle/lodash@3.10.1!collection/pluck.js).
+It is also possible to load several files from a package: [/bundle/lodash@3.10.1!array/fill;collection/pluck.js](http://cdn.foso.me/bundle/lodash@3.10.1!array/fill;collection/pluck.js).
 
 
 ### Using references
