@@ -65,12 +65,12 @@ exports.register = function(plugin, opts, next) {
 
   plugin.expose('getRaw', function(pkgMeta, cb) {
     registry.resolve(pkgMeta.name, pkgMeta.version)
-      .then(function(matchingVersion) {
-        if (matchingVersion !== pkgMeta.version) {
+      .then(function(matchingPkg) {
+        if (matchingPkg.version !== pkgMeta.version) {
           console.log(pkgMeta.name + '@' + pkgMeta.version + ' resolved to ' +
-            pkgMeta.name + '@' + matchingVersion);
+            pkgMeta.name + '@' + matchingPkg.version);
         }
-        var pkg = new Package(pkgMeta.name, matchingVersion, {
+        var pkg = new Package(pkgMeta.name, matchingPkg.version, {
           verbose: true
         });
         pkg.streamFile(pkgMeta.file)
