@@ -12,7 +12,7 @@ exports.register = function(plugin, opts, next) {
     css: 'style'
   };
 
-  plugin.expose('get', function(packages, extension, cb) {
+  plugin.expose('get', function(packages, extension, transformer, cb) {
     async.series(packages.map((pkgMeta) => function(cb) {
       registry.resolve(pkgMeta.name, pkgMeta.version)
         .then(function(matchingPkg) {
@@ -44,7 +44,7 @@ exports.register = function(plugin, opts, next) {
           }
           async.series(files.map(relativeFilePath => function(cb) {
             pkg.readFile(relativeFilePath)
-              .then(file => cb(null, file))
+              .then(file => cb(null, transformer(file)))
               .catch(cb);
           }), function(err, files) {
             if (err) {

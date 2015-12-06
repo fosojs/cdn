@@ -34,6 +34,7 @@
     "catbox": "^7.0.0",
     "catbox-redis": "^1.0.6",
     "chalk": "^1.1.1",
+    "clean-css": "^3.4.8",
     "findit": "^2.0.0",
     "handlebars": "^4.0.5",
     "hapi": "^11.1.1",
@@ -42,6 +43,7 @@
     "request": "^2.67.0",
     "semver": "^5.1.0",
     "tar-fs": "^1.8.1",
+    "uglify-js": "^2.6.1",
     "write-yaml": "^0.2.2",
     "yaml-or-json": "^0.1.0",
     "zlib": "^1.0.5"

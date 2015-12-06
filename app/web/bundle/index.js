@@ -1,8 +1,10 @@
 'use strict';
 
-var parseBundleRoute = require('../../utils/parse-bundle-route');
-var parseExt = require('../../utils/parse-ext');
-var Boom = require('boom');
+const parseBundleRoute = require('../../utils/parse-bundle-route');
+const parseExt = require('../../utils/parse-ext');
+const Boom = require('boom');
+const uglify = require('uglify-js');
+const CleanCSS = require('clean-css');
 
 exports.register = function(server, opts, next) {
   if (!opts.resourcesHost) {
@@ -67,8 +69,18 @@ exports.register = function(server, opts, next) {
     generateFunc: function(id, next) {
       var packages = bundleToPkgs(id);
 
+      var transformer;
+      if (id.transformer === 'uglify' || id.transformer === 'min') {
+        if (id.extension === 'js') {
+          transformer = code => uglify.minify(code, {fromString: true}).code;
+        } else {
+          transformer = code => new CleanCSS().minify(code).styles;
+        }
+      } else {
+        transformer = code => code;
+      }
       server.plugins['bundle-service']
-        .get(packages, id.extension, function(err, pkgFiles) {
+        .get(packages, id.extension, transformer, function(err, pkgFiles) {
           if (err) {
             return next(null, null);
           }
@@ -79,20 +91,29 @@ exports.register = function(server, opts, next) {
     generateTimeout: 1000 * 10 /* 10 seconds */
   });
 
+  function bundleHandler(req, reply) {
+    var bundle = parseBundleRoute(req.params.bundleRoute);
+
+    bundle.transformer = req.params.transformer;
+    bundle.id = req.params.bundleRoute + '-' + bundle.transformer;
+    bundleCache.get(bundle, function(err, content) {
+      if (err || !content) {
+        return reply(Boom.notFound(err));
+      }
+      reply(content).type(extContentType[bundle.extension]);
+    });
+  }
+
   server.route({
     method: 'GET',
     path: '/bundle/{bundleRoute*}',
-    handler: function(req, reply) {
-      var bundle = parseBundleRoute(req.params.bundleRoute);
+    handler: bundleHandler
+  });
 
-      bundle.id = req.params.bundleRoute;
-      bundleCache.get(bundle, function(err, content) {
-        if (err || !content) {
-          return reply(Boom.notFound(err));
-        }
-        reply(content).type(extContentType[bundle.extension]);
-      });
-    }
+  server.route({
+    method: 'GET',
+    path: '/bundle.{transformer}/{bundleRoute*}',
+    handler: bundleHandler
   });
 
   next();
