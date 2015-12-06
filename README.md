@@ -2,7 +2,7 @@
 
 A webservice that dishes out files from npm packages.
 
-Inspired by [npm-cdn][https://github.com/zeke/npm-cdn], [wzrd.in][https://github.com/jfhbrook/wzrd.in] and [brcdn.org][https://github.com/ForbesLindesay/brcdn.org].
+Inspired by [npm-cdn](https://github.com/zeke/npm-cdn), [wzrd.in](https://github.com/jfhbrook/wzrd.in) and [brcdn.org](https://github.com/ForbesLindesay/brcdn.org).
 
 
 ## Installation
@@ -24,16 +24,16 @@ http://cdn.foso.me/{packageName}@{packageVersion}/{filePath}
 
 Examples:
 
-* [/raw/dat@6.8.6/img/dat-website.png][http://cdn.foso.me/raw/dat@6.8.6/img/dat-website.png]
-* [/raw/express@4.10.4/package.json][http://cdn.foso.me/raw/express@4.10.4/package.json]
-* [/raw/zeke.sikelianos.com@1.0.0/assets/images/hands.png][http://cdn.foso.me/raw/zeke.sikelianos.com@1.0.0/assets/images/hands.png]
+* [/raw/dat@6.8.6/img/dat-website.png](http://cdn.foso.me/raw/dat@6.8.6/img/dat-website.png)
+* [/raw/express@4.10.4/package.json](http://cdn.foso.me/raw/express@4.10.4/package.json)
+* [/raw/zeke.sikelianos.com@1.0.0/assets/images/hands.png](http://cdn.foso.me/raw/zeke.sikelianos.com@1.0.0/assets/images/hands.png)
 
 
 ## Indexes
 
 When a package is downloaded, index files are generated in HTML and JSON format.
 
-* [/raw/browserify@8.1.1][http://cdn.foso.me/raw/browserify@8.1.1] renders an HTML page with links to all the files in the package.
+* [/raw/browserify@8.1.1](http://cdn.foso.me/raw/browserify@8.1.1) renders an HTML page with links to all the files in the package.
 
 
 ## Pushing packages to the registry
