@@ -2,7 +2,10 @@
 
 A webservice that dishes out files from npm packages.
 
-Inspired by [npm-cdn](https://github.com/zeke/npm-cdn), [wzrd.in](https://github.com/jfhbrook/wzrd.in) and [brcdn.org](https://github.com/ForbesLindesay/brcdn.org).
+Inspired by [npm-cdn](https://github.com/zeke/npm-cdn),
+[wzrd.in](https://github.com/jfhbrook/wzrd.in),
+[brcdn.org](https://github.com/ForbesLindesay/brcdn.org) and
+[jsdelivr](http://www.jsdelivr.com/).
 
 
 ## Installation
