@@ -1,7 +1,6 @@
 'use strict';
 
 const parseBundleRoute = require('../../utils/parse-bundle-route');
-const parseExt = require('../../utils/parse-ext');
 const Boom = require('boom');
 const uglify = require('uglify-js');
 const CleanCSS = require('clean-css');
@@ -70,7 +69,7 @@ exports.register = function(server, opts, next) {
       var packages = bundleToPkgs(id);
 
       var transformer;
-      if (id.transformer === 'uglify' || id.transformer === 'min') {
+      if (id.options.indexOf('min') !== -1) {
         if (id.extension === 'js') {
           transformer = code => uglify.minify(code, {fromString: true}).code;
         } else {
@@ -94,8 +93,7 @@ exports.register = function(server, opts, next) {
   function bundleHandler(req, reply) {
     var bundle = parseBundleRoute(req.params.bundleRoute);
 
-    bundle.transformer = req.params.transformer;
-    bundle.id = req.params.bundleRoute + '-' + bundle.transformer;
+    bundle.id = req.params.bundleRoute;
     bundleCache.get(bundle, function(err, content) {
       if (err || !content) {
         return reply(Boom.notFound(err));
@@ -107,12 +105,6 @@ exports.register = function(server, opts, next) {
   server.route({
     method: 'GET',
     path: '/bundle/{bundleRoute*}',
-    handler: bundleHandler
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/bundle.{transformer}/{bundleRoute*}',
     handler: bundleHandler
   });
 

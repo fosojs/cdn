@@ -21,9 +21,13 @@ function parsePath(url, extension) {
 
 function parseBundleRoute(route) {
   var parts = parseExt(route);
+  let prefix = route.match(/\.([^@()]+\.)*(js|css)$/)[0];
+  let opts = prefix.split('.');
+
   return {
-    paths: parsePath(parts.path, parts.ext),
-    extension: parts.ext
+    paths: parsePath(parts.path.replace(/(\.[^@()]+)*$/, ''), parts.ext),
+    extension: parts.ext,
+    options: opts.slice(1, opts.length - 1)
   };
 }
 

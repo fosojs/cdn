@@ -60,16 +60,16 @@ the latest version of the `3`rd major version of `bar` and the latest version of
 
 By default, the main file of the package is loaded (the path to the main file is stored in the `"main"` field for js and in the `"style"` field for css, in the `package.json` file). However, it is possible to
 load any file of a package by specifying the path to it. E.g., to load the `collection/pluck.js`
-file of the [lodash](https://www.npmjs.com/package/lodash) package, this URL can be used: [/bundle/lodash@3.10.1!collection/pluck.js](http://cdn.foso.me/bundle/lodash@3.10.1!collection/pluck.js).
-It is also possible to load several files from a package: [/bundle/lodash@3.10.1!array/fill;collection/pluck.js](http://cdn.foso.me/bundle/lodash@3.10.1!array/fill;collection/pluck.js).
+file of the [lodash](https://www.npmjs.com/package/lodash) package, this URL can be used: [/bundle/lodash@3.10.1(collection/pluck).js](http://cdn.foso.me/bundle/lodash@3.10.1(collection/pluck).js).
+It is also possible to load several files from a package: [/bundle/lodash@3.10.1(array/fill+collection/pluck).js](http://cdn.foso.me/bundle/lodash@3.10.1(array/fill+collection/pluck).js).
 
 
 ### Minifying
 
-It is possible to minify the resources by accessing them through the `bundle.min` endpoint instead of `bundle`. For instance:
+It is possible to minify the resources by adding `.min` to the end of their path. For instance:
 
 * the non-minified bootstrap css file: [/bundle/bootstrap@3.3.6.css](http://cdn.foso.me/bundle/bootstrap@3.3.6.css)
-* the minified bootstrap css file: [/bundle.min/bootstrap@3.3.6.css](http://cdn.foso.me/bundle.min/bootstrap@3.3.6.css)
+* the minified bootstrap css file: [/bundle/bootstrap@3.3.6.min.css](http://cdn.foso.me/bundle/bootstrap@3.3.6.min.css)
 
 
 ### Using references

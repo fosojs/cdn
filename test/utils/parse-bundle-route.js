@@ -35,7 +35,7 @@ describe('parse package url', function() {
   });
 
   it('should parse package with version and files', function() {
-    let bundle = parseBundleRoute('foo@3!bar;lib/index.js;lib/qar.js');
+    let bundle = parseBundleRoute('foo@3(bar+lib/index.js+lib/qar).js');
     expect(bundle.extension).to.eq('js');
     expect(bundle.paths.length).to.eq(1);
     expect(bundle.paths[0].name).to.eq('foo');
