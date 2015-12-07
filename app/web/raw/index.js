@@ -18,7 +18,9 @@ module.exports = function(server, opts, next) {
         if (err) {
           return reply(Boom.notFound(err));
         }
-        reply(fileStream);
+        reply(fileStream)
+          .header('cache-control', 'max-age=' +
+            server.plugins['file-max-age'].getByPath(req.params.path));
       });
     }
   });
@@ -28,5 +30,5 @@ module.exports = function(server, opts, next) {
 
 module.exports.attributes = {
   name: 'web/raw',
-  dependencies: ['bundle-service', 'reference-service']
+  dependencies: ['bundle-service', 'reference-service', 'file-max-age']
 };

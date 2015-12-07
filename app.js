@@ -17,6 +17,12 @@ server.connection({ port: config.port });
 
 server.register([
   {
+    register: require('./app/plugins/file-max-age'),
+    options: {
+      maxAge: config.maxAge
+    }
+  },
+  {
     register: require('./app/plugins/reference-service'),
     options: {
       storagePath: config.storagePath

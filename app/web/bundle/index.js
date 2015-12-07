@@ -98,7 +98,10 @@ exports.register = function(server, opts, next) {
       if (err || !content) {
         return reply(Boom.notFound(err));
       }
-      reply(content).type(extContentType[bundle.extension]);
+      reply(content)
+        .type(extContentType[bundle.extension])
+        .header('cache-control', 'max-age=' +
+          server.plugins['file-max-age'].getByExtension(bundle.extension));
     });
   }
 
@@ -113,5 +116,5 @@ exports.register = function(server, opts, next) {
 
 exports.register.attributes = {
   name: 'app/bundle',
-  dependencies: ['bundle-service', 'reference-service']
+  dependencies: ['bundle-service', 'reference-service', 'file-max-age']
 };

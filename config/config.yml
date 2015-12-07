@@ -2,3 +2,8 @@ port: 9595
 ip: localhost
 storagePath: ./files
 tempPath: ./files/tmp
+maxAge:
+  js: 4h
+  css: 4h
+  jpg: 4h
+  default: 4h
