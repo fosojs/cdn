@@ -2,24 +2,16 @@
 
 const request = require('request');
 const semver = require('semver');
+const config = require('../../../config');
 
 //
 // Find tarballs on npm
 //
 var registry = module.exports = {};
 
-//
-// Define the registry that will be used for installing npm packages
-//
-var registryURL = process.env.REGISTRY || 'http://registry.npmjs.org/';
-if (registryURL.substr(-1) !== '/') {
-  registryURL += '/';
-}
-registry.registryURL = registryURL;
-
 registry.metadata = function metadata(module, cb) {
   request({
-    uri: registryURL + module,
+    uri: config.registry + module,
     json: true
   }, function(err, res, body) {
     if (res.statusCode !== 200) {

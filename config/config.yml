@@ -1,7 +1,7 @@
 port: 9595
 ip: localhost
 storagePath: ./files
-tempPath: ./files/tmp
+registry: 'http://registry.npmjs.org/'
 maxAge:
   js: 4h
   css: 4h

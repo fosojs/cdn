@@ -19,8 +19,8 @@ Package.prototype = {
     return normalize(path.resolve(config.storagePath, this.name, this.version));
   },
   get tarballURL() {
-    return fmt('http://registry.npmjs.org/%s/-/%s-%s.tgz',
-      this.name, this.name, this.version);
+    return fmt('%s%s/-/%s-%s.tgz', config.registry, this.name, this.name,
+      this.version);
   },
   get isCached() {
     return fs.existsSync(this.directory);
