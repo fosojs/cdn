@@ -2,16 +2,22 @@
 
 const request = require('request');
 const semver = require('semver');
-const config = require('../../../config');
 
 //
 // Find tarballs on npm
 //
-var registry = module.exports = {};
+function Registry(opts) {
+  opts = opts || {};
 
-registry.metadata = function metadata(module, cb) {
+  if (!opts.registry) {
+    throw new Error('opts.registry is required');
+  }
+  this._registry = opts.registry;
+}
+
+Registry.prototype.metadata = function(module, cb) {
   request({
-    uri: config.registry + module,
+    uri: this._registry + module,
     json: true
   }, function(err, res, body) {
     if (res.statusCode !== 200) {
@@ -30,17 +36,17 @@ registry.metadata = function metadata(module, cb) {
   });
 };
 
-registry.resolve = function resolve(module, version) {
+Registry.prototype.resolve = function resolve(module, version) {
   return new Promise(function(resolve, reject) {
-    registry.versions(module, version, function(err, v) {
+    this.versions(module, version, function(err, v) {
       if (err) return reject(err);
       resolve(v);
     });
   }.bind(this));
 };
 
-registry.versions = function versions(module, version, cb) {
-  registry.metadata(module, function(err, data) {
+Registry.prototype.versions = function versions(module, version, cb) {
+  this.metadata(module, function(err, data) {
     if (err) {
       return cb(err);
     }
@@ -81,3 +87,5 @@ registry.versions = function versions(module, version, cb) {
     cb(null, data.versions[v[0]]);
   });
 };
+
+module.exports = Registry;

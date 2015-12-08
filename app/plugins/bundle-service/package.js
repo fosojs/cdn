@@ -12,6 +12,11 @@ function Package(name, version, opts) {
   this.name = name;
   this.version = version;
   this.opts = opts || {};
+
+  if (!opts.registry) {
+    throw new Error('opts.registry is required');
+  }
+  this._registry = opts.registry;
 }
 
 Package.prototype = {
@@ -19,7 +24,7 @@ Package.prototype = {
     return normalize(path.resolve(config.storagePath, this.name, this.version));
   },
   get tarballURL() {
-    return fmt('%s%s/-/%s-%s.tgz', config.registry, this.name, this.name,
+    return fmt('%s%s/-/%s-%s.tgz', this._registry, this.name, this.name,
       this.version);
   },
   get isCached() {

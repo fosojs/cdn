@@ -4,6 +4,7 @@ const parseBundleRoute = require('../../utils/parse-bundle-route');
 const Boom = require('boom');
 const uglify = require('uglify-js');
 const CleanCSS = require('clean-css');
+var config = require('../../../config');
 
 exports.register = function(server, opts, next) {
   if (!opts.resourcesHost) {
@@ -79,7 +80,11 @@ exports.register = function(server, opts, next) {
         transformer = code => code;
       }
       server.plugins['bundle-service']
-        .get(packages, id.extension, transformer, function(err, pkgFiles) {
+        .get(packages, {
+          extension: id.extension,
+          transformer: transformer,
+          registry: id.registry
+        }, function(err, pkgFiles) {
           if (err) {
             return next(null, null);
           }
@@ -91,9 +96,21 @@ exports.register = function(server, opts, next) {
   });
 
   function bundleHandler(req, reply) {
+    let registry;
+    if (req.params.account) {
+      if (config.accounts && config.accounts[req.params.account]) {
+        registry = config.accounts[req.params.account].registry;
+      } else {
+        return reply(Boom.notFound('Passed account not found'));
+      }
+    } else {
+      registry = config.registry;
+    }
+
     var bundle = parseBundleRoute(req.params.bundleRoute);
 
-    bundle.id = req.params.bundleRoute;
+    bundle.registry = registry;
+    bundle.id = req.params.account + '/' + req.params.bundleRoute;
     bundleCache.get(bundle, function(err, content) {
       if (err || !content) {
         return reply(Boom.notFound(err));
@@ -108,6 +125,12 @@ exports.register = function(server, opts, next) {
   server.route({
     method: 'GET',
     path: '/bundle/{bundleRoute*}',
+    handler: bundleHandler
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/{account}/bundle/{bundleRoute*}',
     handler: bundleHandler
   });
 

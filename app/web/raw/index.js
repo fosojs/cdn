@@ -1,28 +1,50 @@
 'use strict';
 
 var Boom = require('boom');
+var config = require('../../../config');
 
 module.exports = function(server, opts, next) {
+  function rawHandler(req, reply) {
+    let registry;
+    if (req.params.account) {
+      if (config.accounts && config.accounts[req.params.account]) {
+        registry = config.accounts[req.params.account].registry;
+      } else {
+        return reply(Boom.notFound('Passed account not found'));
+      }
+    } else {
+      registry = config.registry;
+    }
+
+    var metaParts = req.params.pkgMeta.split('@');
+    var pkg = {
+      name: metaParts[0],
+      version: metaParts[1] || 'latest',
+      file: req.params.path || '_index.html'
+    };
+
+    server.plugins['bundle-service'].getRaw(pkg, {
+      registry: registry
+    }, function(err, fileStream) {
+      if (err) {
+        return reply(Boom.notFound(err));
+      }
+      reply(fileStream)
+        .header('cache-control', 'max-age=' +
+          server.plugins['file-max-age'].getByPath(req.params.path));
+    });
+  }
+
   server.route({
     method: 'GET',
     path: '/raw/{pkgMeta}/{path*}',
-    handler: function(req, reply) {
-      var metaParts = req.params.pkgMeta.split('@');
-      var pkg = {
-        name: metaParts[0],
-        version: metaParts[1] || 'latest',
-        file: req.params.path || '_index.html'
-      };
+    handler: rawHandler
+  });
 
-      server.plugins['bundle-service'].getRaw(pkg, function(err, fileStream) {
-        if (err) {
-          return reply(Boom.notFound(err));
-        }
-        reply(fileStream)
-          .header('cache-control', 'max-age=' +
-            server.plugins['file-max-age'].getByPath(req.params.path));
-      });
-    }
+  server.route({
+    method: 'GET',
+    path: '/{account}/raw/{pkgMeta}/{path*}',
+    handler: rawHandler
   });
 
   next();

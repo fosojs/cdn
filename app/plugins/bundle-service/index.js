@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const Package = require('./package');
 const async = require('async');
-const registry = require('./registry');
+const Registry = require('./registry');
 
 exports.register = function(plugin, opts, next) {
   const mainFields = {
@@ -12,7 +12,22 @@ exports.register = function(plugin, opts, next) {
     css: 'style'
   };
 
-  plugin.expose('get', function(packages, extension, transformer, cb) {
+  plugin.expose('get', function(packages, opts, cb) {
+    opts = opts || {};
+    if (!opts.registry) {
+      throw new Error('opts.registry is required');
+    }
+    if (!opts.extension) {
+      throw new Error('opts.extension is required');
+    }
+    if (!opts.transformer) {
+      throw new Error('opts.transformer is required');
+    }
+
+    let registry = new Registry({
+      registry: opts.registry
+    });
+
     async.series(packages.map((pkgMeta) => function(cb) {
       registry.resolve(pkgMeta.name, pkgMeta.version)
         .then(function(matchingPkg) {
@@ -28,15 +43,16 @@ exports.register = function(plugin, opts, next) {
               pkgMeta.name + '@' + matchingPkg.version);
           }
           var pkg = new Package(pkgMeta.name, matchingPkg.version, {
-            verbose: true
+            verbose: true,
+            registry: opts.registry
           });
           var files = pkgMeta.files;
           if (!files || !files.length) {
-            let mainField = mainFields[extension];
+            let mainField = mainFields[opts.extension];
             console.log('File not specified. Loading main file:',
               matchingPkg[mainField]);
             let mainFile = matchingPkg[mainField];
-            let end = '.' + extension;
+            let end = '.' + opts.extension;
             if (mainFile.indexOf(end) === -1) {
               mainFile += end;
             }
@@ -44,7 +60,7 @@ exports.register = function(plugin, opts, next) {
           }
           async.series(files.map(relativeFilePath => function(cb) {
             pkg.readFile(relativeFilePath)
-              .then(file => cb(null, transformer(file)))
+              .then(file => cb(null, opts.transformer(file)))
               .catch(cb);
           }), function(err, files) {
             if (err) {
@@ -63,7 +79,16 @@ exports.register = function(plugin, opts, next) {
     });
   });
 
-  plugin.expose('getRaw', function(pkgMeta, cb) {
+  plugin.expose('getRaw', function(pkgMeta, opts, cb) {
+    opts = opts || {};
+    if (!opts.registry) {
+      throw new Error('opts.registry is required');
+    }
+
+    let registry = new Registry({
+      registry: opts.registry
+    });
+
     registry.resolve(pkgMeta.name, pkgMeta.version)
       .then(function(matchingPkg) {
         if (matchingPkg.version !== pkgMeta.version) {
@@ -71,7 +96,8 @@ exports.register = function(plugin, opts, next) {
             pkgMeta.name + '@' + matchingPkg.version);
         }
         var pkg = new Package(pkgMeta.name, matchingPkg.version, {
-          verbose: true
+          verbose: true,
+          registry: opts.registry
         });
         pkg.streamFile(pkgMeta.file)
           .then(stream => cb(null, stream))
