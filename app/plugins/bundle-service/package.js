@@ -16,7 +16,11 @@ function Package(name, version, opts) {
   if (!opts.registry) {
     throw new Error('opts.registry is required');
   }
-  this._registry = opts.registry;
+  this._registry = opts.registry.url;
+  this._headers = {};
+  if (opts.registry.token) {
+    this._headers.authorization = 'Bearer ' + opts.registry.token;
+  }
 }
 
 Package.prototype = {
@@ -51,7 +55,10 @@ Package.prototype.download = function(callback) {
 
   _this.log('downloading tarball: ' + this.tarballURL);
 
-  request(this.tarballURL)
+  request({
+      uri: this.tarballURL,
+      headers: this._headers
+    })
     .pipe(require('zlib').createGunzip())
     .pipe(tar.extract(this.directory))
     .on('finish', function() {

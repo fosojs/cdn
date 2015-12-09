@@ -1,10 +1,12 @@
 port: 9595
 ip: localhost
 storagePath: ./files
-registry: 'http://registry.npmjs.org/'
+registry:
+  url: 'http://registry.npmjs.org/'
 accounts:
   zkochan:
-    registry: 'http://registry.npmjs.org/'
+    registry:
+      url: 'http://registry.npmjs.org/'
 maxAge:
   js: 4h
   css: 4h

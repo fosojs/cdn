@@ -12,13 +12,19 @@ function Registry(opts) {
   if (!opts.registry) {
     throw new Error('opts.registry is required');
   }
-  this._registry = opts.registry;
+  this._registry = opts.registry.url;
+
+  this._headers = {};
+  if (opts.registry.token) {
+    this._headers.authorization = 'Bearer ' + opts.registry.token;
+  }
 }
 
 Registry.prototype.metadata = function(module, cb) {
   request({
     uri: this._registry + module,
-    json: true
+    json: true,
+    headers: this._headers
   }, function(err, res, body) {
     if (res.statusCode !== 200) {
       if (body.error === 'not_found') {
