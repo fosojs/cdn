@@ -47,12 +47,12 @@ exports.register = function(server, opts, next) {
 
   function bundleFiles(type, pkgFiles) {
     if (type === 'js') {
-      var bundle = 'window.ung=window.ung||{skippedPackages:[]};' +
-        'ung.packages=ung.packages||{};ung.origin="' + opts.resourcesHost + '"';
+      var bundle = 'window.cdn=window.cdn||{skippedPackages:[]};' +
+        'cdn.packages=cdn.packages||{};cdn.origin="' + opts.resourcesHost + '"';
       bundle += pkgFiles.reduce(function(memo, pkgFiles) {
-        return memo + ';ung.packages["' + pkgFiles.name +
+        return memo + ';cdn.packages["' + pkgFiles.name +
           '"]={version:"' + pkgFiles.version + '"};' +
-          'if (ung.skippedPackages.indexOf("' +
+          'if (cdn.skippedPackages.indexOf("' +
           pkgFiles.name + '") === -1) {' +  pkgFiles.files.join('') +
           '}';
       }, '');

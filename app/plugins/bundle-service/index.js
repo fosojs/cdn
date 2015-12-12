@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const Package = require('./package');
+const LocalPackage = require('./local-package');
 const async = require('async');
 const Registry = require('./registry');
 
@@ -11,6 +12,15 @@ exports.register = function(plugin, opts, next) {
     js: 'main',
     css: 'style'
   };
+
+  let overrides = {};
+  if (opts.overridePath) {
+    let overridePkg = require(path.join(opts.overridePath, 'package.json'));
+    overrides[overridePkg.name] = {
+      path: opts.overridePath,
+      pkg: overridePkg
+    };
+  }
 
   plugin.expose('get', function(packages, opts, cb) {
     opts = opts || {};
@@ -29,50 +39,65 @@ exports.register = function(plugin, opts, next) {
     });
 
     async.series(packages.map((pkgMeta) => function(cb) {
-      registry.resolve(pkgMeta.name, pkgMeta.version)
-        .then(function(matchingPkg) {
-          if (!matchingPkg) {
-            console.log('No matching version found for', pkgMeta.name + '@' +
-              pkgMeta.version);
-            cb(new Error('no matching version found for ' + pkgMeta.name + '@' +
-              pkgMeta.version));
-            return;
-          }
-          if (matchingPkg.version !== pkgMeta.version) {
-            console.log(pkgMeta.name + '@' + pkgMeta.version + ' resolved to ' +
-              pkgMeta.name + '@' + matchingPkg.version);
-          }
-          var pkg = new Package(pkgMeta.name, matchingPkg.version, {
+
+      function downloadPkgFiles(matchingPkg) {
+        if (!matchingPkg) {
+          console.log('No matching version found for', pkgMeta.name + '@' +
+            pkgMeta.version);
+          cb(new Error('no matching version found for ' + pkgMeta.name + '@' +
+            pkgMeta.version));
+          return;
+        }
+        if (matchingPkg.version !== pkgMeta.version) {
+          console.log(pkgMeta.name + '@' + pkgMeta.version + ' resolved to ' +
+            pkgMeta.name + '@' + matchingPkg.version);
+        }
+        var pkg;
+        if (overrides[pkgMeta.name]) {
+          console.log('the package is overriden locally');
+          console.log('getting from', overrides[pkgMeta.name].path);
+          pkg = new LocalPackage(overrides[pkgMeta.name].path);
+        } else {
+          pkg = new Package(pkgMeta.name, matchingPkg.version, {
             verbose: true,
             registry: opts.registry
           });
-          var files = pkgMeta.files;
-          if (!files || !files.length) {
-            let mainField = mainFields[opts.extension];
-            console.log('File not specified. Loading main file:',
-              matchingPkg[mainField]);
-            let mainFile = matchingPkg[mainField];
-            let end = '.' + opts.extension;
-            if (mainFile.indexOf(end) === -1) {
-              mainFile += end;
-            }
-            files = [mainFile];
+        }
+        var files = pkgMeta.files;
+        if (!files || !files.length) {
+          let mainField = mainFields[opts.extension];
+          console.log('File not specified. Loading main file:',
+            matchingPkg[mainField]);
+          let mainFile = matchingPkg[mainField];
+          let end = '.' + opts.extension;
+          if (mainFile.indexOf(end) === -1) {
+            mainFile += end;
           }
-          async.series(files.map(relativeFilePath => function(cb) {
-            pkg.readFile(relativeFilePath)
-              .then(file => cb(null, opts.transformer(file)))
-              .catch(cb);
-          }), function(err, files) {
-            if (err) {
-              return cb(err);
-            }
-            cb(null, {
-              name: pkgMeta.name,
-              version: matchingPkg.version,
-              files: files
-            });
+          files = [mainFile];
+        }
+        async.series(files.map(relativeFilePath => function(cb) {
+          pkg.readFile(relativeFilePath)
+            .then(file => cb(null, opts.transformer(file)))
+            .catch(cb);
+        }), function(err, files) {
+          if (err) {
+            return cb(err);
+          }
+          cb(null, {
+            name: pkgMeta.name,
+            version: matchingPkg.version,
+            files: files
           });
-        })
+        });
+      }
+
+      if (overrides[pkgMeta.name]) {
+        downloadPkgFiles(overrides[pkgMeta.name].pkg);
+        return;
+      }
+
+      registry.resolve(pkgMeta.name, pkgMeta.version)
+        .then(downloadPkgFiles)
         .catch(cb);
     }), function(err, packageFiles) {
       cb(err, packageFiles);
@@ -89,20 +114,34 @@ exports.register = function(plugin, opts, next) {
       registry: opts.registry
     });
 
-    registry.resolve(pkgMeta.name, pkgMeta.version)
-      .then(function(matchingPkg) {
-        if (matchingPkg.version !== pkgMeta.version) {
-          console.log(pkgMeta.name + '@' + pkgMeta.version + ' resolved to ' +
-            pkgMeta.name + '@' + matchingPkg.version);
-        }
-        var pkg = new Package(pkgMeta.name, matchingPkg.version, {
+    function downloadFile(matchingPkg) {
+      if (matchingPkg.version !== pkgMeta.version) {
+        console.log(pkgMeta.name + '@' + pkgMeta.version + ' resolved to ' +
+          pkgMeta.name + '@' + matchingPkg.version);
+      }
+      var pkg;
+      if (overrides[pkgMeta.name]) {
+        console.log('the package is overriden locally');
+        console.log('getting from', overrides[pkgMeta.name].path);
+        pkg = new LocalPackage(overrides[pkgMeta.name].path);
+      } else {
+        pkg = new Package(pkgMeta.name, matchingPkg.version, {
           verbose: true,
           registry: opts.registry
         });
-        pkg.streamFile(pkgMeta.file)
-          .then(stream => cb(null, stream))
-          .catch(cb);
-      })
+      }
+      pkg.streamFile(pkgMeta.file)
+        .then(stream => cb(null, stream))
+        .catch(cb);
+    }
+
+    if (overrides[pkgMeta.name]) {
+      downloadFile(overrides[pkgMeta.name].pkg);
+      return;
+    }
+
+    registry.resolve(pkgMeta.name, pkgMeta.version)
+      .then(downloadFile)
       .catch(cb);
   });
 
