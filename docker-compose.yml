@@ -1,4 +1,4 @@
-ung:
+foso-cdn:
   build: .
   volumes:
     - .:/src

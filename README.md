@@ -1,4 +1,4 @@
-# ung-server
+# foso-cdn
 
 A webservice that dishes out files from npm packages.
 
@@ -11,7 +11,7 @@ Inspired by [npm-cdn](https://github.com/zeke/npm-cdn),
 ## Installation
 
 ```
-$ git clone https://github.com/ungjs/ung-server.git && cd ./ung-server
+$ git clone https://github.com/fosojs/cdn.git && cd ./cdn
 $ npm install
 $ node app
 ```
@@ -72,26 +72,6 @@ It is possible to minify the resources by adding `.min` to the end of their path
 * the minified bootstrap css file: [/bundle/bootstrap@3.3.6.min.css](http://cdn.foso.me/bundle/bootstrap@3.3.6.min.css)
 
 
-### Using references
-
-Sometimes there might be a need to have a static address that can hide dynamic
-content behind it. Why? Because even though ung bundles are flexible,
-links on HTML pages are immutable. Even though it is possible to get a completely different
-bundle by changing the versions of the packages, it is hard to update the
-link on the HTML page without updating the server. That's when references come handy.
-
-References are named sets of packages. They have immutable names but the resources that
-they are loading can be changed.
-
-A reference can be loaded by putting the `@` character before it's name. For example:
-`/bundle/@main.js`.
-
-References can be created, changed with the [ung-cli][].
-
-
 ## License
 
 The MIT License (MIT)
-
-
-[ung-cli]: https://github.com/ungjs/ung

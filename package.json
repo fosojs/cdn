@@ -1,19 +1,21 @@
 {
-  "name": "ung-server",
+  "name": "foso-cdn",
   "version": "0.0.0",
   "private": true,
-  "description": "Ung package manager server.",
+  "description": "A webservice that dishes out files from npm packages.",
   "main": "index.js",
   "scripts": {
     "test": "mocha test/**/*.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ungjs/ung-server.git"
+    "url": "git+https://github.com/fosojs/cdn.git"
   },
   "keywords": [
     "package",
-    "manager"
+    "manager",
+    "cdn",
+    "npm"
   ],
   "author": {
     "name": "Zoltan Kochan",
@@ -22,9 +24,9 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ungjs/ung-server/issues"
+    "url": "https://github.com/fosojs/cdn/issues"
   },
-  "homepage": "https://github.com/ungjs/ung-server#readme",
+  "homepage": "https://github.com/fosojs/cdn#readme",
   "publishConfig": {
     "registry": "http://registry.npmjs.org"
   },
