@@ -43,14 +43,12 @@ exports.register = function(server, opts, next) {
 
   function bundleFiles(type, pkgFiles) {
     if (type === 'js') {
-      var bundle = 'window.cdn=window.cdn||{skippedPackages:[]};' +
+      var bundle = 'window.cdn=window.cdn||{};' +
         'cdn.packages=cdn.packages||{};cdn.origin="' + opts.resourcesHost + '"';
       bundle += pkgFiles.reduce(function(memo, pkgFiles) {
         return memo + ';cdn.packages["' + pkgFiles.name +
           '"]={version:"' + pkgFiles.version + '"};' +
-          'if (cdn.skippedPackages.indexOf("' +
-          pkgFiles.name + '") === -1) {' +  pkgFiles.files.join(';') +
-          '}';
+          pkgFiles.files.join(';');
       }, '');
       return bundle;
     }
