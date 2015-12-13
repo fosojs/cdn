@@ -25,13 +25,12 @@ module.exports = function(server, opts, next) {
 
     server.plugins['bundle-service'].getRaw(pkg, {
       registry: registry
-    }, function(err, fileStream) {
+    }, function(err, result) {
       if (err) {
         return reply(Boom.notFound(err));
       }
-      reply(fileStream)
-        .header('cache-control', 'max-age=' +
-          server.plugins['file-max-age'].getByPath(req.params.path));
+      reply(result.stream)
+        .header('cache-control', 'max-age=' + result.maxAge);
     });
   }
 

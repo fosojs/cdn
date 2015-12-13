@@ -53,7 +53,8 @@ exports.register = function(plugin, opts, next) {
             pkgMeta.name + '@' + matchingPkg.version);
         }
         var pkg;
-        if (overrides[pkgMeta.name]) {
+        var isOverriden = !!overrides[pkgMeta.name];
+        if (isOverriden) {
           console.log('the package is overriden locally');
           console.log('getting from', overrides[pkgMeta.name].path);
           pkg = new LocalPackage(overrides[pkgMeta.name].path);
@@ -86,7 +87,9 @@ exports.register = function(plugin, opts, next) {
           cb(null, {
             name: pkgMeta.name,
             version: matchingPkg.version,
-            files: files
+            files: files,
+            maxAge: isOverriden ?
+              0 : plugin.plugins['file-max-age'].getByExtension(opts.extension)
           });
         });
       }
@@ -120,7 +123,8 @@ exports.register = function(plugin, opts, next) {
           pkgMeta.name + '@' + matchingPkg.version);
       }
       var pkg;
-      if (overrides[pkgMeta.name]) {
+      var isOverriden = !!overrides[pkgMeta.name];
+      if (isOverriden) {
         console.log('the package is overriden locally');
         console.log('getting from', overrides[pkgMeta.name].path);
         pkg = new LocalPackage(overrides[pkgMeta.name].path);
@@ -131,7 +135,11 @@ exports.register = function(plugin, opts, next) {
         });
       }
       pkg.streamFile(pkgMeta.file)
-        .then(stream => cb(null, stream))
+        .then(stream => cb(null, {
+          stream: stream,
+          maxAge: isOverriden ?
+            0 : plugin.plugins['file-max-age'].getByPath(pkgMeta.file)
+        }))
         .catch(cb);
     }
 
@@ -149,5 +157,6 @@ exports.register = function(plugin, opts, next) {
 };
 
 exports.register.attributes = {
-  name: 'bundle-service'
+  name: 'bundle-service',
+  dependencies: ['file-max-age']
 };

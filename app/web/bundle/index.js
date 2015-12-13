@@ -5,6 +5,7 @@ const Boom = require('boom');
 const uglify = require('uglify-js');
 const CleanCSS = require('clean-css');
 var config = require('../../../config');
+const R = require('ramda');
 
 exports.register = function(server, opts, next) {
   if (!opts.resourcesHost) {
@@ -37,11 +38,6 @@ exports.register = function(server, opts, next) {
 
   function bundleToPkgs(bundle) {
     var packages = pathsToPkgs(bundle.paths, bundle.extension);
-    /*packages.forEach(function(pkg) {
-      if (!pkg.files || !pkg.files.length) {
-        pkg.files = ['index.' + bundle.extension];
-      }
-    });*/
     return packages;
   }
 
@@ -89,7 +85,10 @@ exports.register = function(server, opts, next) {
             return next(null, null);
           }
           var content = bundleFiles(id.extension, pkgFiles);
-          next(null, content);
+          next(null, {
+            content: content,
+            maxAge: R.reduce(R.min, Infinity, R.map(R.path(['maxAge']), pkgFiles))
+          });
         });
     },
     generateTimeout: 1000 * 10 /* 10 seconds */
@@ -111,14 +110,13 @@ exports.register = function(server, opts, next) {
 
     bundle.registry = registry;
     bundle.id = req.params.account + '/' + req.params.bundleRoute;
-    bundleCache.get(bundle, function(err, content) {
-      if (err || !content) {
+    bundleCache.get(bundle, function(err, result) {
+      if (err || !result.content) {
         return reply(Boom.notFound(err));
       }
-      reply(content)
+      reply(result.content)
         .type(extContentType[bundle.extension])
-        .header('cache-control', 'max-age=' +
-          server.plugins['file-max-age'].getByExtension(bundle.extension));
+        .header('cache-control', 'max-age=' + result.maxAge);
     });
   }
 
@@ -139,5 +137,5 @@ exports.register = function(server, opts, next) {
 
 exports.register.attributes = {
   name: 'app/bundle',
-  dependencies: ['bundle-service', 'reference-service', 'file-max-age']
+  dependencies: ['bundle-service', 'reference-service']
 };
