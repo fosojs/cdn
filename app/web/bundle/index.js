@@ -12,34 +12,10 @@ exports.register = function(server, opts, next) {
     return next(new Error('opts.resourcesHost is required'));
   }
 
-  var refService = server.plugins['reference-service'];
-
   var extContentType = {
     js: 'text/javascript',
     css: 'text/css'
   };
-
-  function pathsToPkgs(paths, extension) {
-    var packages = [];
-    paths.forEach(function(path) {
-      if (typeof path === 'object') {
-        packages.push(path);
-        return;
-      }
-      packages = packages.concat(referenceToPkgs(path, extension));
-    });
-    return packages;
-  }
-
-  function referenceToPkgs(refName, extension) {
-    var referencePackages = refService.get(refName + '.' + extension);
-    return pathsToPkgs(referencePackages, extension);
-  }
-
-  function bundleToPkgs(bundle) {
-    var packages = pathsToPkgs(bundle.paths, bundle.extension);
-    return packages;
-  }
 
   function bundleFiles(type, pkgFiles) {
     if (type === 'js') {
@@ -61,8 +37,6 @@ exports.register = function(server, opts, next) {
     //cache: 'redisCache',
     expiresIn: opts.internalCacheExpiresIn,
     generateFunc: function(id, next) {
-      var packages = bundleToPkgs(id);
-
       var transformer;
       if (id.options.indexOf('min') !== -1) {
         if (id.extension === 'js') {
@@ -74,7 +48,7 @@ exports.register = function(server, opts, next) {
         transformer = code => code;
       }
       server.plugins['bundle-service']
-        .get(packages, {
+        .get(id.paths, {
           extension: id.extension,
           transformer: transformer,
           registry: id.registry
@@ -135,5 +109,5 @@ exports.register = function(server, opts, next) {
 
 exports.register.attributes = {
   name: 'app/bundle',
-  dependencies: ['bundle-service', 'reference-service']
+  dependencies: ['bundle-service']
 };

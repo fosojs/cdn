@@ -46,7 +46,6 @@
     "semver": "^5.1.0",
     "tar-fs": "^1.8.1",
     "uglify-js": "^2.6.1",
-    "write-yaml": "^0.2.2",
     "yaml-or-json": "^0.1.0",
     "zlib": "^1.0.5"
   },

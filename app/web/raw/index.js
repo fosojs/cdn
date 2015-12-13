@@ -51,5 +51,5 @@ module.exports = function(server, opts, next) {
 
 module.exports.attributes = {
   name: 'web/raw',
-  dependencies: ['bundle-service', 'reference-service', 'file-max-age']
+  dependencies: ['bundle-service', 'file-max-age']
 };

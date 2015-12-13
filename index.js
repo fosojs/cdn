@@ -32,12 +32,6 @@ CdnServer.prototype.start = function() {
         }
       },
       {
-        register: require('./app/plugins/reference-service'),
-        options: {
-          storagePath: config.storagePath
-        }
-      },
-      {
         register: require('./app/plugins/bundle-service'),
         options: {
           overridePath: this._src
@@ -50,7 +44,6 @@ CdnServer.prototype.start = function() {
           internalCacheExpiresIn: this._internalCacheExpiresIn
         }
       },
-      { register: require('./app/web/push') },
       { register: require('./app/web/raw') }
     ], function(err) {
       if (err) {
