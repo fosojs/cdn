@@ -53,13 +53,16 @@ exports.register = function(server, opts, next) {
           transformer: transformer,
           registry: id.registry
         }, function(err, pkgFiles) {
-          if (err) {
-            return next(null, null);
-          }
+          if (err) return next(null, null);
+
           var content = bundleFiles(id.extension, pkgFiles);
           next(null, {
             content: content,
-            maxAge: R.reduce(R.min, Infinity, R.map(R.path(['maxAge']), pkgFiles))
+            maxAge: R.reduce(
+              R.min,
+              Infinity,
+              R.map(R.path(['maxAge']), pkgFiles)
+            )
           });
         });
     },
