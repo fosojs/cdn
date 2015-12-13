@@ -7,6 +7,7 @@ function CdnServer(opts) {
   opts = opts || {};
   this._src = opts.src;
   this._port = opts.port || config.port;
+  this._internalCacheExpiresIn = opts.internalCacheExpiresIn || 1;
 }
 
 CdnServer.prototype.start = function() {
@@ -45,7 +46,8 @@ CdnServer.prototype.start = function() {
       {
         register: require('./app/web/bundle'),
         options: {
-          resourcesHost: config.ip + ':' + this._port
+          resourcesHost: config.ip + ':' + this._port,
+          internalCacheExpiresIn: this._internalCacheExpiresIn
         }
       },
       { register: require('./app/web/push') },

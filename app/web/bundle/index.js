@@ -65,7 +65,7 @@ exports.register = function(server, opts, next) {
 
   var bundleCache = server.cache({
     //cache: 'redisCache',
-    expiresIn: 1000 * 60 * 5,
+    expiresIn: opts.internalCacheExpiresIn,
     generateFunc: function(id, next) {
       var packages = bundleToPkgs(id);
 
