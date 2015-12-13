@@ -49,7 +49,7 @@ exports.register = function(server, opts, next) {
         return memo + ';cdn.packages["' + pkgFiles.name +
           '"]={version:"' + pkgFiles.version + '"};' +
           'if (cdn.skippedPackages.indexOf("' +
-          pkgFiles.name + '") === -1) {' +  pkgFiles.files.join('') +
+          pkgFiles.name + '") === -1) {' +  pkgFiles.files.join(';') +
           '}';
       }, '');
       return bundle;
