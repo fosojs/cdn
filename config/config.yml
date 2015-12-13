@@ -1,6 +1,6 @@
 port: 9595
 ip: localhost
-storagePath: ./files
+storagePath: ./.cdn-cache
 registry:
   url: 'http://registry.npmjs.org/'
 accounts:
