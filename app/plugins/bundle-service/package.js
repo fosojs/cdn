@@ -7,6 +7,8 @@ const fs = require('fs');
 const path = require('path');
 const config = require('../../../config');
 const normalize = require('normalize-path');
+const chalk = require('chalk');
+const debug = require('debug')('cdn');
 
 function Package(name, version, opts) {
   this.name = name;
@@ -39,21 +41,13 @@ Package.prototype = {
   }
 };
 
-Package.prototype.log = function(msg) {
-  var _this = this;
-
-  if (_this.opts.verbose) {
-    console.log(msg);
-  }
-};
-
 Package.prototype.download = function(callback) {
   var _this = this;
   if (_this.isCached) {
     return callback(null);
   }
 
-  _this.log('downloading tarball: ' + this.tarballURL);
+  debug('downloading tarball: ' + chalk.magenta(this.tarballURL));
 
   request({
       uri: this.tarballURL,
@@ -62,9 +56,9 @@ Package.prototype.download = function(callback) {
     .pipe(require('zlib').createGunzip())
     .pipe(tar.extract(this.directory))
     .on('finish', function() {
-      _this.log('tarball downloaded: ' + this.tarballURL);
+      debug('tarball downloaded: ' + chalk.magenta(this.tarballURL));
       _this.buildFileTree(callback);
-    })
+    }.bind(this))
     .on('error', callback);
 };
 
@@ -73,7 +67,7 @@ Package.prototype.buildFileTree = function(callback) {
   var finder = require('findit')(_this.directory);
   _this.files = [];
 
-  _this.log('building file tree');
+  debug('building file tree');
 
   finder.on('file', function(file, stat) {
     _this.files.push(normalize(file)
@@ -81,7 +75,7 @@ Package.prototype.buildFileTree = function(callback) {
   });
 
   finder.on('end', function() {
-    _this.log('built file tree', _this.files);
+    debug('built file tree');
     _this.writeIndexFiles(callback);
   });
 };
@@ -92,21 +86,21 @@ Package.prototype.writeIndexFiles = function(callback) {
     fs.readFileSync(path.resolve(__dirname, './index.template.hbs'), 'utf-8')
   );
 
-  _this.log('writing _index.json');
+  debug('writing _index.json');
 
   fs.writeFileSync(
     path.resolve(_this.directory, 'package', '_index.json'),
     JSON.stringify(_this.files, null, 2)
   );
 
-  _this.log('writing _index.html');
+  debug('writing _index.html');
 
   fs.writeFileSync(
     path.resolve(_this.directory, 'package', '_index.html'),
     indexTemplate(_this)
   );
 
-  _this.log('wrote index files');
+  debug('wrote index files');
 
   callback(null);
 };

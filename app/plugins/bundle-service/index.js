@@ -6,6 +6,8 @@ const Package = require('./package');
 const LocalPackage = require('./local-package');
 const async = require('async');
 const Registry = require('./registry');
+const chalk = require('chalk');
+const debug = require('debug')('cdn');
 
 exports.register = function(plugin, opts, next) {
   const mainFields = {
@@ -42,33 +44,34 @@ exports.register = function(plugin, opts, next) {
 
       function downloadPkgFiles(matchingPkg) {
         if (!matchingPkg) {
-          console.log('No matching version found for', pkgMeta.name + '@' +
-            pkgMeta.version);
+          debug('No matching version found for ' +
+            chalk.blue(pkgMeta.name + '@' + pkgMeta.version));
           cb(new Error('no matching version found for ' + pkgMeta.name + '@' +
             pkgMeta.version));
           return;
         }
         if (matchingPkg.version !== pkgMeta.version) {
-          console.log(pkgMeta.name + '@' + pkgMeta.version + ' resolved to ' +
-            pkgMeta.name + '@' + matchingPkg.version);
+          debug(chalk.blue(pkgMeta.name + '@' + pkgMeta.version) +
+            ' resolved to ' +
+            chalk.blue(pkgMeta.name + '@' + matchingPkg.version));
         }
         var pkg;
         var isOverriden = !!overrides[pkgMeta.name];
         if (isOverriden) {
-          console.log('the package is overriden locally');
-          console.log('getting from', overrides[pkgMeta.name].path);
+          debug('The requested package ' + chalk.blue(pkgMeta.name) +
+            ' is overriden locally with ' +
+            chalk.magenta(overrides[pkgMeta.name].path));
           pkg = new LocalPackage(overrides[pkgMeta.name].path);
         } else {
           pkg = new Package(pkgMeta.name, matchingPkg.version, {
-            verbose: true,
             registry: opts.registry
           });
         }
         var files = pkgMeta.files;
         if (!files || !files.length) {
           let mainField = mainFields[opts.extension];
-          console.log('File not specified. Loading main file:',
-            matchingPkg[mainField]);
+          debug('File not specified. Loading main file: ' +
+            chalk.magenta(matchingPkg[mainField]));
           let mainFile = matchingPkg[mainField];
           let end = '.' + opts.extension;
           if (mainFile.indexOf(end) === -1) {
@@ -119,18 +122,19 @@ exports.register = function(plugin, opts, next) {
 
     function downloadFile(matchingPkg) {
       if (matchingPkg.version !== pkgMeta.version) {
-        console.log(pkgMeta.name + '@' + pkgMeta.version + ' resolved to ' +
-          pkgMeta.name + '@' + matchingPkg.version);
+        debug(chalk.blue(pkgMeta.name + '@' + pkgMeta.version) +
+          ' resolved to ' +
+          chalk.blue(pkgMeta.name + '@' + matchingPkg.version));
       }
       var pkg;
       var isOverriden = !!overrides[pkgMeta.name];
       if (isOverriden) {
-        console.log('the package is overriden locally');
-        console.log('getting from', overrides[pkgMeta.name].path);
+        debug('The requested package ' + chalk.blue(pkgMeta.name) +
+          ' is overriden locally with ' +
+          chalk.magenta(overrides[pkgMeta.name].path));
         pkg = new LocalPackage(overrides[pkgMeta.name].path);
       } else {
         pkg = new Package(pkgMeta.name, matchingPkg.version, {
-          verbose: true,
           registry: opts.registry
         });
       }

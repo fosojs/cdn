@@ -2,6 +2,7 @@
 
 var config = require('./config');
 var Hapi = require('hapi');
+const chalk = require('chalk');
 
 function CdnServer(opts) {
   opts = opts || {};
@@ -53,8 +54,8 @@ CdnServer.prototype.start = function() {
       server.start(function() {
         console.log('--------------------------------------');
         console.log('');
-        console.log('  foso cdn server started');
-        console.log('  Hosted on ' + server.info.uri);
+        console.log('  ' + chalk.blue('foso cdn') + ' server started');
+        console.log('  Hosted on ' + chalk.magenta(server.info.uri));
         console.log('  Press Ctrl+C to stop the server');
         console.log('');
         console.log('--------------------------------------');
