@@ -86,7 +86,7 @@ exports.register = function(server, opts, next) {
     bundle.registry = registry;
     bundle.id = req.params.account + '/' + req.params.bundleRoute;
     bundleCache.get(bundle, function(err, result) {
-      if (err || !result.content) {
+      if (err || !result || !result.content) {
         return reply(Boom.notFound(err));
       }
       reply(result.content)
