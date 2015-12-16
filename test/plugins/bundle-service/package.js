@@ -18,7 +18,8 @@ describe('Package', function() {
       .then(function(file) {
         expect(file).to.contain("EventEmitter: require('../../vendor/EventEmitter2').EventEmitter2,");
         done();
-      });
+      })
+      .catch(err => console.log(err));
   });
 
   it('should throw error on reading non-existing files', function(done) {

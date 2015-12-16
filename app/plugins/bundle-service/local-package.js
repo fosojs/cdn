@@ -2,28 +2,18 @@
 
 const path = require('path');
 const fs = require('fs');
+const streamToString = require('./stream-to-string');
 
 function LocalPackage(src) {
   this._src = src;
 }
 
 LocalPackage.prototype.readFile = function(filename) {
-  return new Promise(function(resolve, reject) {
-    this.streamFile(filename)
-      .then(function(stream) {
-        stream.setEncoding('utf8');
-        var file = '';
-        stream.on('data', (chunk) => file += chunk);
-        stream.on('end', () => resolve(file));
-      })
-      .catch(reject);
-  }.bind(this));
+  return this.streamFile(filename).then(streamToString);
 };
 
 LocalPackage.prototype.streamFile = function(filename) {
   return new Promise(function(resolve, reject) {
-    var self = this;
-
     var file = path.resolve(this._src, filename);
 
     if (!fs.existsSync(file)) {

@@ -1,6 +1,6 @@
 'use strict';
 
-var fmt = require('util').format;
+const fmt = require('util').format;
 const request = require('request');
 const tar = require('tar-fs');
 const zlib = require('zlib');
@@ -12,6 +12,7 @@ const config = require('../../../config');
 const normalize = require('normalize-path');
 const chalk = require('chalk');
 const debug = require('debug')('cdn');
+const streamToString = require('./stream-to-string');
 
 function Package(name, version, opts) {
   this.name = name;
@@ -45,8 +46,7 @@ Package.prototype = {
 };
 
 Package.prototype.download = function(callback) {
-  var _this = this;
-  if (_this.isCached) {
+  if (this.isCached) {
     return callback(null);
   }
 
@@ -61,47 +61,45 @@ Package.prototype.download = function(callback) {
     .pipe(tar.extract(this.directory))
     .on('finish', function() {
       debug('tarball downloaded: ' + chalk.magenta(this.tarballURL));
-      _this.buildFileTree(callback);
+      this.buildFileTree(callback);
     }.bind(this))
     .on('error', callback);
 };
 
 Package.prototype.buildFileTree = function(callback) {
-  var _this = this;
-  var finder = findit(_this.directory);
-  _this.files = [];
+  let finder = findit(this.directory);
+  this.files = [];
 
   debug('building file tree');
 
   finder.on('file', function(file, stat) {
-    _this.files.push(normalize(file)
-      .replace(_this.directory + '/package/', ''));
-  });
+    this.files.push(normalize(file)
+      .replace(this.directory + '/package/', ''));
+  }.bind(this));
 
   finder.on('end', function() {
     debug('built file tree');
-    _this.writeIndexFiles(callback);
-  });
+    this.writeIndexFiles(callback);
+  }.bind(this));
 };
 
 Package.prototype.writeIndexFiles = function(callback) {
-  var _this = this;
-  var indexTemplate = handlebars.compile(
+  let indexTemplate = handlebars.compile(
     fs.readFileSync(path.resolve(__dirname, './index.template.hbs'), 'utf-8')
   );
 
   debug('writing _index.json');
 
   fs.writeFileSync(
-    path.resolve(_this.directory, 'package', '_index.json'),
-    JSON.stringify(_this.files, null, 2)
+    path.resolve(this.directory, 'package', '_index.json'),
+    JSON.stringify(this.files, null, 2)
   );
 
   debug('writing _index.html');
 
   fs.writeFileSync(
-    path.resolve(_this.directory, 'package', '_index.html'),
-    indexTemplate(_this)
+    path.resolve(this.directory, 'package', '_index.html'),
+    indexTemplate(this)
   );
 
   debug('wrote index files');
@@ -111,9 +109,7 @@ Package.prototype.writeIndexFiles = function(callback) {
 
 Package.prototype.streamFile = function(filename) {
   return new Promise(function(resolve, reject) {
-    var self = this;
-
-    var file = path.resolve(this.directory, 'package', filename);
+    let file = path.resolve(this.directory, 'package', filename);
 
     this.download(function(err) {
       if (err) {
@@ -128,7 +124,7 @@ Package.prototype.streamFile = function(filename) {
         return resolve(fs.createReadStream(file));
       }
 
-      if (self.json.icon && self.json.icon === filename) {
+      if (this.json.icon && this.json.icon === filename) {
         return resolve(fs.createReadStream(file));
       }
 
@@ -136,21 +132,12 @@ Package.prototype.streamFile = function(filename) {
         return reject(new Error('I only serve package.json files and package icons these days.'));
       }
       return resolve(fs.createReadStream(file));
-    });
+    }.bind(this));
   }.bind(this));
 };
 
 Package.prototype.readFile = function(filename) {
-  return new Promise(function(resolve, reject) {
-    this.streamFile(filename)
-      .then(function(stream) {
-        stream.setEncoding('utf8');
-        var file = '';
-        stream.on('data', (chunk) => file += chunk);
-        stream.on('end', () => resolve(file));
-      })
-      .catch(reject);
-  }.bind(this));
+  return this.streamFile(filename).then(streamToString);
 };
 
 module.exports = Package;
