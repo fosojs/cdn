@@ -20,7 +20,7 @@ function Registry(opts) {
   }
 }
 
-Registry.prototype.metadata = function(module, cb) {
+Registry.prototype._metadata = function(module, cb) {
   request({
     uri: this._registry + module,
     json: true,
@@ -42,22 +42,20 @@ Registry.prototype.metadata = function(module, cb) {
   });
 };
 
-Registry.prototype.resolve = function resolve(module, version) {
+Registry.prototype.resolve = function(module, version) {
   return new Promise(function(resolve, reject) {
-    this.versions(module, version, function(err, v) {
+    this._versions(module, version, function(err, v) {
       if (err) return reject(err);
       resolve(v);
     });
   }.bind(this));
 };
 
-Registry.prototype.versions = function versions(module, version, cb) {
-  this.metadata(module, function(err, data) {
-    if (err) {
-      return cb(err);
-    }
+Registry.prototype._versions = function(module, version, cb) {
+  this._metadata(module, function(err, data) {
+    if (err) return cb(err);
 
-    var v;
+    let v;
 
     try {
       if (version === 'latest') {
@@ -65,27 +63,18 @@ Registry.prototype.versions = function versions(module, version, cb) {
       } else if (!semver.validRange(version)) {
         console.log('not a valid range ' + version);
 
-        v = Object.keys(data.versions)
-          .filter(function(v) {
-            return v === version;
-          })
-        ;
+        v = Object.keys(data.versions).filter(v => v === version);
       } else {
         v = Object.keys(data.versions)
-          .filter(function(v) {
-            return semver.satisfies(v, version);
-          })
-          .sort(function(a, b) {
-            return semver.lte(a, b);
-          })
-        ;
+          .filter(v => semver.satisfies(v, version))
+          .sort((a, b) => semver.lte(a, b));
       }
     } catch (e) {
       v = null;
     }
 
-    if (!v) {
-      var e = new Error('No match for semver `' + version + '` found');
+    if (!v || !v.length) {
+      let e = new Error('No match for semver `' + version + '` found');
       e.versions = Object.keys(data.versions);
       return cb(e);
     }
