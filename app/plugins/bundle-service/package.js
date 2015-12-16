@@ -3,6 +3,9 @@
 var fmt = require('util').format;
 const request = require('request');
 const tar = require('tar-fs');
+const zlib = require('zlib');
+const findit = require('findit');
+const handlebars = require('handlebars');
 const fs = require('fs');
 const path = require('path');
 const config = require('../../../config');
@@ -53,7 +56,8 @@ Package.prototype.download = function(callback) {
       uri: this.tarballURL,
       headers: this._headers
     })
-    .pipe(require('zlib').createGunzip())
+    .pipe(zlib.createGunzip())
+    .on('error', callback)
     .pipe(tar.extract(this.directory))
     .on('finish', function() {
       debug('tarball downloaded: ' + chalk.magenta(this.tarballURL));
@@ -64,7 +68,7 @@ Package.prototype.download = function(callback) {
 
 Package.prototype.buildFileTree = function(callback) {
   var _this = this;
-  var finder = require('findit')(_this.directory);
+  var finder = findit(_this.directory);
   _this.files = [];
 
   debug('building file tree');
@@ -82,7 +86,7 @@ Package.prototype.buildFileTree = function(callback) {
 
 Package.prototype.writeIndexFiles = function(callback) {
   var _this = this;
-  var indexTemplate = require('handlebars').compile(
+  var indexTemplate = handlebars.compile(
     fs.readFileSync(path.resolve(__dirname, './index.template.hbs'), 'utf-8')
   );
 
