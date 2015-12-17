@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "node app",
-    "test": "mocha test/**/*.js --reporter dot"
+    "test": "mocha test/**/*.js --reporter dot",
+    "docs:clean": "rimraf _book",
+    "docs:prepare": "gitbook install",
+    "docs:build": "npm run docs:prepare && gitbook build",
+    "docs:watch": "npm run docs:prepare && gitbook serve"
   },
   "repository": {
     "type": "git",
@@ -53,6 +57,7 @@
   },
   "devDependencies": {
     "chai": "^3.4.1",
+    "gitbook-cli": "^1.0.1",
     "mocha": "^2.3.4"
   }
 }
