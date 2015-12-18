@@ -21,6 +21,9 @@
     "cdn",
     "npm"
   ],
+  "bin": {
+    "fcdn": "./bin/fcdn.js"
+  },
   "author": {
     "name": "Zoltan Kochan",
     "email": "zoltan.kochan@gmail.com",
@@ -41,6 +44,7 @@
     "catbox-redis": "^1.0.6",
     "chalk": "^1.1.1",
     "clean-css": "^3.4.8",
+    "commander": "^2.9.0",
     "debug": "^2.2.0",
     "duration-js": "^3.3.4",
     "findit": "^2.0.0",
@@ -52,6 +56,7 @@
     "semver": "^5.1.0",
     "tar-fs": "^1.8.1",
     "uglify-js": "^2.6.1",
+    "update-notifier": "^0.6.0",
     "yaml-or-json": "^0.1.0",
     "zlib": "^1.0.5"
   },
