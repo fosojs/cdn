@@ -1,3 +1,4 @@
+<!--email_off-->
 # foso-cdn
 
 A webservice that dishes out files from npm packages.
@@ -75,3 +76,4 @@ It is possible to minify the resources by adding `.min` to the end of their path
 ## License
 
 The MIT License (MIT)
+<!--/email_off-->

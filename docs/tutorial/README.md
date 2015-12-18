@@ -14,7 +14,7 @@ To install the `foso-cdn`, run:
 npm install -g foso-cdn
 ```
 
-Once you have it, just go to the root directory of the package that you want to develop and run `foso-cdn serve`.
+Once you have it, just go to the root directory of the package that you want to develop and run `fcdn serve`.
 
 This command will run a foso-cdn server locally and function as usually but when the package that you are developing will be requested,
 it will return the resources from your local files system instead of from the npm registry.

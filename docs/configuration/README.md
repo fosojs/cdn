@@ -1,3 +1,4 @@
+<!--email_off-->
 # Configuration
 
 You can configure the way a package is served by **foso-cdn** by changing its
@@ -50,3 +51,4 @@ You might want to disallow some private npm modules from being served through fo
 ``` js
 "cdn": false
 ```
+<!--/email_off-->

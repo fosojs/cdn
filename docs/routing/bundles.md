@@ -1,3 +1,4 @@
+<!--email_off-->
 # Bundles
 
 Any npm package can be loaded through the `/bundle/{bundleRoute}` endpoint.
@@ -33,3 +34,4 @@ It is possible to minify the resources by adding `.min` to the end of their path
 [1]: https://www.npmjs.com/package/lodash
 [2]: http://cdn.foso.me/bundle/lodash@3.10.1(collection/pluck).js
 [3]: http://cdn.foso.me/bundle/lodash@3.10.1(array/fill+collection/pluck).js
+<!--/email_off-->
