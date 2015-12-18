@@ -1,6 +1,6 @@
 {
   "name": "foso-cdn",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A webservice that dishes out files from npm packages.",
   "main": "index.js",
   "scripts": {
