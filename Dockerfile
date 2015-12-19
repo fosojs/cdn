@@ -1,4 +1,4 @@
-FROM node:5.3.0-onbuild
+FROM node:5.2.0-onbuild
 
 MAINTAINER Zoltan Kochan, zoltan.kochan@gmail.com
 
