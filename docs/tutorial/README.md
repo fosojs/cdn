@@ -35,3 +35,11 @@ gulp.task('develop', function(cb) {
   server.start().then(cb);
 });
 ```
+
+
+## TodoMVC
+
+See `foso-cdn` in action on the [TodoMVC project][todomvc].
+
+
+[todomvc]: https://github.com/fosojs/todomvc
