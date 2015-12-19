@@ -1,0 +1,12 @@
+foso-cdn:
+  build: .
+  volumes:
+    - .:/src
+  ports:
+    - 9595:9595
+  environment:
+    NODE_ENV: development
+#  links:
+#    - redis
+#redis:
+#  image: redis

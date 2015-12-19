@@ -1,0 +1,285 @@
+<!DOCTYPE HTML>
+<html lang="en" >
+    
+    <head>
+        
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <title>Bundles | foso-cdn</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 2.6.6">
+        
+        
+        <meta name="HandheldFriendly" content="true"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+        <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+        
+    <link rel="stylesheet" href="../../gitbook/style.css">
+    
+        
+        <link rel="stylesheet" href="../../gitbook/plugins/gitbook-plugin-highlight/website.css">
+        
+    
+        
+        <link rel="stylesheet" href="../../gitbook/plugins/gitbook-plugin-search/search.css">
+        
+    
+        
+        <link rel="stylesheet" href="../../gitbook/plugins/gitbook-plugin-fontsettings/website.css">
+        
+    
+    
+
+        
+    
+    
+    <link rel="next" href="../../docs/routing/indexes.html" />
+    
+    
+    <link rel="prev" href="../../docs/routing/files.html" />
+    
+
+        
+    </head>
+    <body>
+        
+        
+    <div class="book"
+        data-level="1.2"
+        data-chapter-title="Bundles"
+        data-filepath="docs/routing/bundles.md"
+        data-basepath="../.."
+        data-revision="Sat Dec 19 2015 21:44:35 GMT+0200 (Фінляндія (зима))"
+        data-innerlanguage="">
+    
+
+<div class="book-summary">
+    <nav role="navigation">
+        <ul class="summary">
+            
+            
+            
+            
+
+            
+
+            
+    
+        <li class="chapter " data-level="0" data-path="index.html">
+            
+                
+                    <a href="../../index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                        Introduction
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="1" data-path="docs/routing/index.html">
+            
+                
+                    <a href="../../docs/routing/index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>1.</b>
+                        
+                        Routing
+                    </a>
+            
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.1" data-path="docs/routing/files.html">
+            
+                
+                    <a href="../../docs/routing/files.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>1.1.</b>
+                        
+                        Files
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.2" data-path="docs/routing/bundles.html">
+            
+                
+                    <a href="../../docs/routing/bundles.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>1.2.</b>
+                        
+                        Bundles
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="docs/routing/indexes.html">
+            
+                
+                    <a href="../../docs/routing/indexes.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>1.3.</b>
+                        
+                        Indexes
+                    </a>
+            
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2" data-path="docs/configuration/index.html">
+            
+                
+                    <a href="../../docs/configuration/index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>2.</b>
+                        
+                        Configuration
+                    </a>
+            
+            
+        </li>
+    
+        <li class="chapter " data-level="3" data-path="docs/tutorial/index.html">
+            
+                
+                    <a href="../../docs/tutorial/index.html">
+                
+                        <i class="fa fa-check"></i>
+                        
+                            <b>3.</b>
+                        
+                        Tutorial
+                    </a>
+            
+            
+        </li>
+    
+
+
+            
+            <li class="divider"></li>
+            <li>
+                <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+                    Published with GitBook
+                </a>
+            </li>
+            
+        </ul>
+    </nav>
+</div>
+
+    <div class="book-body">
+        <div class="body-inner">
+            <div class="book-header" role="navigation">
+    <!-- Actions Left -->
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="../../" >foso-cdn</a>
+    </h1>
+</div>
+
+            <div class="page-wrapper" tabindex="-1" role="main">
+                <div class="page-inner">
+                
+                
+                    <section class="normal" id="section-">
+                    
+                        <!--email_off-->
+<h1 id="bundles">Bundles</h1>
+<p>Any npm package can be loaded through the <code>/bundle/{bundleRoute}</code> endpoint.
+The <code>bundleRoute</code> should end either with <code>.js</code> or <code>.css</code> and should contain a list
+of one or more <code>packageRoutes</code>. For example, <code>/bundle/foo,bar,baz.js</code> will return a JavaScript file that is a
+concatenation of the latest versions of <code>foo</code>, <code>bar</code>, <code>baz</code>.</p>
+<h2 id="loading-specific-versions">Loading specific versions</h2>
+<p>Sometimes it might be necessary to load a specific version of a package. In order to do so, it is
+possible to specify the version of the package after a <code>@</code> character. For example,
+<code>/bundle/foo@4.2.13,bar@3,baz.js</code> will return the <code>4.2.13</code>&apos;s version of <code>foo</code>,
+the latest version of the <code>3</code>rd major version of <code>bar</code> and the latest version of
+<code>baz</code>.</p>
+<h2 id="loading-specific-files">Loading specific files</h2>
+<p>By default, the main file of the package is loaded (the path to the main file is stored in the <code>&quot;main&quot;</code> field for js and in the <code>&quot;style&quot;</code> field for css, in the <code>package.json</code> file). However, it is possible to
+load any file of a package by specifying the path to it. E.g., to load the <code>collection/pluck.js</code>
+file of the <a href="https://www.npmjs.com/package/lodash" target="_blank">lodash</a> package, this URL can be used: <a href="http://cdn.foso.me/bundle/lodash@3.10.1(collection/pluck).js" target="_blank">/bundle/lodash@3.10.1(collection/pluck).js</a>.
+It is also possible to load several files from a package: <a href="http://cdn.foso.me/bundle/lodash@3.10.1(array/fill+collection/pluck).js" target="_blank">/bundle/lodash@3.10.1(array/fill+collection/pluck).js</a>.</p>
+<h2 id="minifying">Minifying</h2>
+<p>It is possible to minify the resources by adding <code>.min</code> to the end of their path. For instance:</p>
+<ul>
+<li>the non-minified bootstrap css file: <a href="http://cdn.foso.me/bundle/bootstrap@3.3.6.css" target="_blank">/bundle/bootstrap@3.3.6.css</a></li>
+<li>the minified bootstrap css file: <a href="http://cdn.foso.me/bundle/bootstrap@3.3.6.min.css" target="_blank">/bundle/bootstrap@3.3.6.min.css</a></li>
+</ul>
+<!--/email_off-->
+
+                    
+                    </section>
+                
+                
+                </div>
+            </div>
+        </div>
+
+        
+        <a href="../../docs/routing/files.html" class="navigation navigation-prev " aria-label="Previous page: Files"><i class="fa fa-angle-left"></i></a>
+        
+        
+        <a href="../../docs/routing/indexes.html" class="navigation navigation-next " aria-label="Next page: Indexes"><i class="fa fa-angle-right"></i></a>
+        
+    </div>
+</div>
+
+        
+<script src="../../gitbook/app.js"></script>
+
+    
+    <script src="../../gitbook/plugins/gitbook-plugin-search/lunr.min.js"></script>
+    
+
+    
+    <script src="../../gitbook/plugins/gitbook-plugin-search/search.js"></script>
+    
+
+    
+    <script src="../../gitbook/plugins/gitbook-plugin-sharing/buttons.js"></script>
+    
+
+    
+    <script src="../../gitbook/plugins/gitbook-plugin-fontsettings/buttons.js"></script>
+    
+
+<script>
+require(["gitbook"], function(gitbook) {
+    var config = {"highlight":{},"search":{"maxIndexSize":1000000},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2}};
+    gitbook.start(config);
+});
+</script>
+
+        
+    </body>
+    
+</html>
