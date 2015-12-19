@@ -81,7 +81,14 @@ exports.register = function(plugin, opts, next) {
         }
         async.series(files.map(relativeFilePath => function(cb) {
           pkg.readFile(relativeFilePath)
-            .then(file => cb(null, opts.transformer(file)))
+            .then(file => cb(null, opts.transformer({
+              content: file,
+              pkg: {
+                name: pkgMeta.name,
+                version: pkgMeta.version,
+                filePath: relativeFilePath
+              }
+            }).content))
             .catch(cb);
         }), function(err, files) {
           if (err) {

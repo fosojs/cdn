@@ -6,6 +6,7 @@ const uglify = require('uglify-js');
 const CleanCSS = require('clean-css');
 var config = require('../../../config');
 const R = require('ramda');
+const fullCssUrl = require('../../utils/full-css-url');
 
 exports.register = function(server, opts, next) {
   if (!opts.resourcesHost) {
@@ -40,9 +41,14 @@ exports.register = function(server, opts, next) {
       var transformer;
       if (id.options.indexOf('min') !== -1) {
         if (id.extension === 'js') {
-          transformer = code => uglify.minify(code, {fromString: true}).code;
+          transformer = params => R.merge(params, {
+            content: uglify.minify(params.content, {fromString: true}).code
+          });
         } else {
-          transformer = code => new CleanCSS().minify(code).styles;
+          let minifyTransformer = params => R.merge(params, {
+            content: new CleanCSS().minify(params.content).styles
+          });
+          transformer = R.compose(minifyTransformer, fullCssUrl);
         }
       } else {
         transformer = code => code;
