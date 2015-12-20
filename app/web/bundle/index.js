@@ -97,7 +97,8 @@ exports.register = function(server, opts, next) {
       }
       reply(result.content)
         .type(extContentType[bundle.extension])
-        .header('cache-control', 'max-age=' + result.maxAge);
+        .header('cache-control', 'max-age=' + result.maxAge)
+        .header('Access-Control-Allow-Origin', '*');
     });
   }
 

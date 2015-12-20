@@ -30,7 +30,8 @@ module.exports = function(server, opts, next) {
         return reply(Boom.notFound(err));
       }
       reply(result.stream)
-        .header('cache-control', 'max-age=' + result.maxAge);
+        .header('cache-control', 'max-age=' + result.maxAge)
+        .header('Access-Control-Allow-Origin', '*');
     });
   }
 
