@@ -61,8 +61,8 @@ the latest version of the `3`rd major version of `bar` and the latest version of
 
 By default, the main file of the package is loaded (the path to the main file is stored in the `"main"` field for js and in the `"style"` field for css, in the `package.json` file). However, it is possible to
 load any file of a package by specifying the path to it. E.g., to load the `collection/pluck.js`
-file of the [lodash](https://www.npmjs.com/package/lodash) package, this URL can be used: [/bundle/lodash@3.10.1(collection/pluck).js](http://cdn.foso.me/bundle/lodash@3.10.1(collection/pluck).js).
-It is also possible to load several files from a package: [/bundle/lodash@3.10.1(array/fill+collection/pluck).js](http://cdn.foso.me/bundle/lodash@3.10.1(array/fill+collection/pluck).js).
+file of the [lodash](https://www.npmjs.com/package/lodash) package, this URL can be used: [/bundle/lodash@3.10.1(collection/pluck).js][1].
+It is also possible to load several files from a package: [/bundle/lodash@3.10.1(array/fill+collection/pluck).js][2].
 
 
 ### Minifying
@@ -76,4 +76,7 @@ It is possible to minify the resources by adding `.min` to the end of their path
 ## License
 
 The MIT License (MIT)
+
+[1]: http://cdn.foso.me/bundle/lodash@3.10.1(collection/pluck).js
+[2]: http://cdn.foso.me/bundle/lodash@3.10.1(array/fill+collection/pluck).js
 <!--/email_off-->
