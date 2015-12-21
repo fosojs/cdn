@@ -7,13 +7,14 @@ module.exports = function(server, opts, next) {
   function rawHandler(req, reply) {
     let registry;
     if (req.params.account) {
-      if (config.accounts && config.accounts[req.params.account]) {
-        registry = config.accounts[req.params.account].registry;
+      if (config.get('accounts') &&
+        config.get('accounts')[req.params.account]) {
+        registry = config.get('accounts')[req.params.account].registry;
       } else {
         return reply(Boom.notFound('Passed account not found'));
       }
     } else {
-      registry = config.registry;
+      registry = config.get('registry');
     }
 
     var metaParts = req.params.pkgMeta.split('@');

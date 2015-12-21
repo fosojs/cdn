@@ -31,7 +31,7 @@ function Package(name, version, opts) {
 
 Package.prototype = {
   get directory() {
-    return normalize(path.resolve(config.storagePath, this.name, this.version));
+    return normalize(path.resolve(config.get('storagePath'), this.name, this.version));
   },
   get tarballURL() {
     return fmt('%s%s/-/%s-%s.tgz', this._registry, this.name, this.name,

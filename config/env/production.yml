@@ -1,0 +1,11 @@
+port: 9595
+ip: localhost
+origin: 'cdn.foso.me'
+storagePath: ./.cdn-cache
+registry:
+  url: 'http://registry.npmjs.org/'
+maxAge:
+  js: 4h
+  css: 4h
+  jpg: 4h
+  default: 4h

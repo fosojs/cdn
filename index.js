@@ -7,7 +7,7 @@ const chalk = require('chalk');
 function CdnServer(opts) {
   opts = opts || {};
   this._src = opts.src;
-  this._port = opts.port || config.port;
+  this._port = opts.port || config.get('port');
   this._internalCacheExpiresIn = opts.internalCacheExpiresIn || 1;
 }
 
@@ -29,7 +29,7 @@ CdnServer.prototype.start = function() {
       {
         register: require('./app/plugins/file-max-age'),
         options: {
-          maxAge: config.maxAge
+          maxAge: config.get('maxAge')
         }
       },
       {
@@ -41,7 +41,8 @@ CdnServer.prototype.start = function() {
       {
         register: require('./app/web/bundle'),
         options: {
-          resourcesHost: config.ip + ':' + this._port,
+          resourcesHost: config.get('origin') ||
+            config.get('ip') + ':' + this._port,
           internalCacheExpiresIn: this._internalCacheExpiresIn
         }
       },
