@@ -18,6 +18,10 @@ function CdnServer(opts) {
 CdnServer.prototype.start = function() {
   return new Promise((resolve, reject) => {
     let server = new Hapi.Server({
+      debug: {
+        log: ['error'],
+        request: ['error'],
+      },
       /*cache: [
         {
           name: 'redisCache',
