@@ -41,7 +41,7 @@ CdnServer.prototype.start = function() {
       {
         register: require('./app/web/bundle'),
         options: {
-          resourcesHost: config.get('origin') ||
+          resourcesHost: config.get('host') ||
             config.get('ip') + ':' + this._port,
           internalCacheExpiresIn: this._internalCacheExpiresIn
         }

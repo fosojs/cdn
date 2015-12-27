@@ -12,6 +12,12 @@ let config = convict({
     default: 'development',
     env: 'NODE_ENV'
   },
+  host: {
+    doc: 'The host name of the cdn server',
+    format: String,
+    default: '',
+    env: 'CDN_HOST'
+  },
   port: {
     doc: 'The port to bind',
     format: 'port',
