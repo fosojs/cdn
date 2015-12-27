@@ -1,7 +1,7 @@
 'use strict';
 
-var config = require('./config');
-var Hapi = require('hapi');
+const config = require('./config');
+const Hapi = require('hapi');
 const chalk = require('chalk');
 
 function CdnServer(opts) {
@@ -13,7 +13,7 @@ function CdnServer(opts) {
 
 CdnServer.prototype.start = function() {
   return new Promise((resolve, reject) => {
-    var server = new Hapi.Server({
+    let server = new Hapi.Server({
       /*cache: [
         {
           name: 'redisCache',
@@ -26,6 +26,12 @@ CdnServer.prototype.start = function() {
     server.connection({ port: this._port });
 
     server.register([
+      {
+        register: require('./app/plugins/registry'),
+        options: {
+          mongoURI: config.get('mongodbUrl'),
+        },
+      },
       {
         register: require('./app/plugins/file-max-age'),
         options: {
@@ -48,9 +54,7 @@ CdnServer.prototype.start = function() {
       },
       { register: require('./app/web/raw') }
     ], function(err) {
-      if (err) {
-        reject(err);
-      }
+      if (err) reject(err);
 
       server.start(function() {
         console.log('--------------------------------------');

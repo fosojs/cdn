@@ -7,6 +7,10 @@ accounts:
   zkochan:
     registry:
       url: 'http://registry.npmjs.org/'
+mongodb:
+  address: localhost
+  port: 27017
+  name: sitegate-registry-dev
 maxAge:
   js: 4h
   css: 4h

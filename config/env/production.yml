@@ -4,6 +4,8 @@ origin: 'cdn.foso.me'
 storagePath: ./.cdn-cache
 registry:
   url: 'http://registry.npmjs.org/'
+mongodb:
+  name: sitegate-registry
 maxAge:
   js: 4h
   css: 4h
