@@ -46,19 +46,12 @@ describe('parse package url', function() {
     expect(bundle.paths[0].files[2]).to.eq('lib/qar.js');
   });
 
-  it('should parse named bundle', function() {
-    let bundle = parseBundleRoute('@foo.js');
+  it('should parse one scoped package with version', function() {
+    let bundle = parseBundleRoute('@james/foo@4.2.1.js');
     expect(bundle.extension).to.eq('js');
     expect(bundle.paths.length).to.eq(1);
-    expect(bundle.paths[0]).to.eq('foo');
-  });
-
-  it('should parse named bundle and package', function() {
-    let bundle = parseBundleRoute('@foo,bar.js');
-    expect(bundle.extension).to.eq('js');
-    expect(bundle.paths.length).to.eq(2);
-    expect(bundle.paths[0]).to.eq('foo');
-    expect(bundle.paths[1].name).to.eq('bar');
-    expect(bundle.paths[1].version).to.eq('*');
+    expect(bundle.paths[0].name).to.eq('@james/foo');
+    expect(bundle.paths[0].version).to.eq('4.2.1');
+    expect(bundle.paths[0].files).to.be.undefined;
   });
 });
