@@ -20,7 +20,14 @@
     "package",
     "manager",
     "cdn",
-    "npm"
+    "npm",
+    "static",
+    "files",
+    "assets",
+    "resources",
+    "content",
+    "delivery",
+    "network"
   ],
   "bin": {
     "fcdn": "./bin/fcdn.js"
