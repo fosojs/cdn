@@ -2,7 +2,7 @@ port: 9595
 ip: localhost
 storagePath: ./.cdn-cache
 registry:
-  url: 'http://registry.npmjs.org/'
+  url: 'https://registry.npmjs.org/'
 accounts:
   zkochan:
     registry:

@@ -1,7 +1,9 @@
 'use strict';
 
-const request = require('request');
+const RegClient = require('npm-registry-client');
 const semver = require('semver');
+
+let regClient = new RegClient();
 
 //
 // Find tarballs on npm
@@ -12,35 +14,8 @@ function Registry(opts) {
   if (!opts.registry) {
     throw new Error('opts.registry is required');
   }
-  this._registry = opts.registry.url;
-
-  this._headers = {};
-  if (opts.registry.token) {
-    this._headers.authorization = 'Bearer ' + opts.registry.token;
-  }
+  this._registry = opts.registry;
 }
-
-Registry.prototype._metadata = function(module, cb) {
-  request({
-    uri: this._registry + module,
-    json: true,
-    headers: this._headers
-  }, function(err, res, body) {
-    if (res.statusCode !== 200) {
-      if (body.error === 'not_found') {
-        err = new Error('module `' + module + '` is not on npm.');
-      } else {
-        err = new Error('npm registry returned status code ' + res.statusCode);
-      }
-    }
-
-    if (err) {
-      err.body = body;
-    }
-
-    cb(err, body);
-  });
-};
 
 Registry.prototype.resolve = function(module, version) {
   return new Promise(function(resolve, reject) {
@@ -52,7 +27,11 @@ Registry.prototype.resolve = function(module, version) {
 };
 
 Registry.prototype._versions = function(module, version, cb) {
-  this._metadata(module, function(err, data) {
+  regClient.get(this._registry.url + module.replace('/', '%2f'), {
+    auth: {
+      token: this._registry.token,
+    },
+  }, function(err, data) {
     if (err) return cb(err);
 
     let v;

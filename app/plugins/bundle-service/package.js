@@ -1,7 +1,7 @@
 'use strict';
 
+const RegClient = require('npm-registry-client');
 const fmt = require('util').format;
-const request = require('request');
 const tar = require('tar-fs');
 const zlib = require('zlib');
 const findit = require('findit');
@@ -14,6 +14,8 @@ const chalk = require('chalk');
 const debug = require('debug')('cdn');
 const streamToString = require('./stream-to-string');
 
+let regClient = new RegClient();
+
 function Package(name, version, opts) {
   this.name = name;
   this.version = version;
@@ -22,19 +24,24 @@ function Package(name, version, opts) {
   if (!opts.registry) {
     throw new Error('opts.registry is required');
   }
-  this._registry = opts.registry.url;
-  this._headers = {};
-  if (opts.registry.token) {
-    this._headers.authorization = 'Bearer ' + opts.registry.token;
-  }
+  this._registry = opts.registry;
 }
 
 Package.prototype = {
   get directory() {
-    return normalize(path.resolve(config.get('storagePath'), this.name, this.version));
+    let packageFolder = this.name.replace('/', '--');
+    return normalize(
+      path.resolve(config.get('storagePath'), packageFolder, this.version)
+    );
   },
   get tarballURL() {
-    return fmt('%s%s/-/%s-%s.tgz', this._registry, this.name, this.name,
+    let justPkgName;
+    if (this.name[0] !== '@') {
+      justPkgName = this.name;
+    } else {
+      justPkgName = this.name.split('/')[1];
+    }
+    return fmt('%s%s/-/%s-%s.tgz', this._registry.url, this.name, justPkgName,
       this.version);
   },
   get isCached() {
@@ -46,24 +53,27 @@ Package.prototype = {
 };
 
 Package.prototype.download = function(callback) {
-  if (this.isCached) {
-    return callback(null);
-  }
+  if (this.isCached) return callback(null);
 
   debug('downloading tarball: ' + chalk.magenta(this.tarballURL));
 
-  request({
-      uri: this.tarballURL,
-      headers: this._headers
-    })
-    .pipe(zlib.createGunzip())
-    .on('error', callback)
-    .pipe(tar.extract(this.directory))
-    .on('finish', function() {
-      debug('tarball downloaded: ' + chalk.magenta(this.tarballURL));
-      this.buildFileTree(callback);
-    }.bind(this))
-    .on('error', callback);
+  regClient.fetch(this.tarballURL, {
+    auth: {
+      token: this._registry.token,
+    },
+  }, function(err, res) {
+    if (err) return callback(err);
+
+    res
+      .pipe(zlib.createGunzip())
+      .on('error', callback)
+      .pipe(tar.extract(this.directory))
+      .on('finish', function() {
+        debug('tarball downloaded: ' + chalk.magenta(this.tarballURL));
+        this.buildFileTree(callback);
+      }.bind(this))
+      .on('error', callback);
+  }.bind(this));
 };
 
 Package.prototype.buildFileTree = function(callback) {
