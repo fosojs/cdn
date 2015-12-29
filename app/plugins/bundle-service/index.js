@@ -24,6 +24,40 @@ exports.register = function(plugin, opts, next) {
     };
   }
 
+  function getPackageLoader(pkgMeta, matchingPkg, opts, cb) {
+    if (!matchingPkg) {
+      debug('No matching version found for ' +
+        chalk.blue(pkgMeta.name + '@' + pkgMeta.version));
+      cb(new Error('no matching version found for ' + pkgMeta.name + '@' +
+        pkgMeta.version));
+      return;
+    }
+    if (matchingPkg.version !== pkgMeta.version) {
+      debug(chalk.blue(pkgMeta.name + '@' + pkgMeta.version) +
+        ' resolved to ' +
+        chalk.blue(pkgMeta.name + '@' + matchingPkg.version));
+    }
+    let isOverriden = !!overrides[pkgMeta.name];
+    if (isOverriden) {
+      debug('The requested package ' + chalk.blue(pkgMeta.name) +
+        ' is overriden locally with ' +
+        chalk.magenta(overrides[pkgMeta.name].path));
+      let pkg = new LocalPackage(overrides[pkgMeta.name].path);
+      return cb(null, pkg, isOverriden);
+    }
+    let pkg = new Package(pkgMeta.name, matchingPkg.version, {
+      registry: opts.registry
+    });
+    cb(null, pkg, isOverriden);
+  }
+
+  let getMatchingPkg = function(registry, pkgMeta) {
+    if (overrides[pkgMeta.name]) {
+      return Promise.resolve(overrides[pkgMeta.name].pkg);
+    }
+    return registry.resolve(pkgMeta.name, pkgMeta.version);
+  };
+
   plugin.expose('get', function(packages, opts, cb) {
     opts = opts || {};
     if (!opts.registry) {
@@ -43,73 +77,48 @@ exports.register = function(plugin, opts, next) {
     async.series(packages.map((pkgMeta) => function(cb) {
 
       function downloadPkgFiles(matchingPkg) {
-        if (!matchingPkg) {
-          debug('No matching version found for ' +
-            chalk.blue(pkgMeta.name + '@' + pkgMeta.version));
-          cb(new Error('no matching version found for ' + pkgMeta.name + '@' +
-            pkgMeta.version));
-          return;
-        }
-        if (matchingPkg.version !== pkgMeta.version) {
-          debug(chalk.blue(pkgMeta.name + '@' + pkgMeta.version) +
-            ' resolved to ' +
-            chalk.blue(pkgMeta.name + '@' + matchingPkg.version));
-        }
-        let pkg;
-        let isOverriden = !!overrides[pkgMeta.name];
-        if (isOverriden) {
-          debug('The requested package ' + chalk.blue(pkgMeta.name) +
-            ' is overriden locally with ' +
-            chalk.magenta(overrides[pkgMeta.name].path));
-          pkg = new LocalPackage(overrides[pkgMeta.name].path);
-        } else {
-          pkg = new Package(pkgMeta.name, matchingPkg.version, {
-            registry: opts.registry
-          });
-        }
-        let files = pkgMeta.files;
-        if (!files || !files.length) {
-          let mainField = mainFields[opts.extension];
-          debug('File not specified. Loading main file: ' +
-            chalk.magenta(matchingPkg[mainField]));
-          let mainFile = matchingPkg[mainField];
-          let end = '.' + opts.extension;
-          if (mainFile.indexOf(end) === -1) {
-            mainFile += end;
+        getPackageLoader(pkgMeta, matchingPkg, opts, function(err, pkg, isOverriden) {
+          if (err) return cb(err);
+
+          let files = pkgMeta.files;
+          if (!files || !files.length) {
+            let mainField = mainFields[opts.extension];
+            debug('File not specified. Loading main file: ' +
+              chalk.magenta(matchingPkg[mainField]));
+            let mainFile = matchingPkg[mainField];
+            let end = '.' + opts.extension;
+            if (mainFile.indexOf(end) === -1) {
+              mainFile += end;
+            }
+            files = [mainFile];
           }
-          files = [mainFile];
-        }
-        async.series(files.map(relativeFilePath => function(cb) {
-          pkg.readFile(relativeFilePath)
-            .then(file => cb(null, opts.transformer({
-              content: file,
-              pkg: {
-                name: pkgMeta.name,
-                version: pkgMeta.version,
-                filePath: relativeFilePath
-              }
-            }).content))
-            .catch(cb);
-        }), function(err, files) {
-          if (err) {
-            return cb(err);
-          }
-          cb(null, {
-            name: pkgMeta.name,
-            version: matchingPkg.version,
-            files: files,
-            maxAge: isOverriden ?
-              0 : plugin.plugins['file-max-age'].getByExtension(opts.extension)
+          async.series(files.map(relativeFilePath => function(cb) {
+            pkg.readFile(relativeFilePath)
+              .then(file => cb(null, opts.transformer({
+                content: file,
+                pkg: {
+                  name: pkgMeta.name,
+                  version: pkgMeta.version,
+                  filePath: relativeFilePath
+                }
+              }).content))
+              .catch(cb);
+          }), function(err, files) {
+            if (err) {
+              return cb(err);
+            }
+            cb(null, {
+              name: pkgMeta.name,
+              version: matchingPkg.version,
+              files: files,
+              maxAge: isOverriden ?
+                0 : plugin.plugins['file-max-age'].getByExtension(opts.extension)
+            });
           });
         });
       }
 
-      if (overrides[pkgMeta.name]) {
-        downloadPkgFiles(overrides[pkgMeta.name].pkg);
-        return;
-      }
-
-      registry.resolve(pkgMeta.name, pkgMeta.version)
+      getMatchingPkg(registry, pkgMeta)
         .then(downloadPkgFiles)
         .catch(cb);
     }), function(err, packageFiles) {
@@ -128,38 +137,20 @@ exports.register = function(plugin, opts, next) {
     });
 
     function downloadFile(matchingPkg) {
-      if (matchingPkg.version !== pkgMeta.version) {
-        debug(chalk.blue(pkgMeta.name + '@' + pkgMeta.version) +
-          ' resolved to ' +
-          chalk.blue(pkgMeta.name + '@' + matchingPkg.version));
-      }
-      let pkg;
-      let isOverriden = !!overrides[pkgMeta.name];
-      if (isOverriden) {
-        debug('The requested package ' + chalk.blue(pkgMeta.name) +
-          ' is overriden locally with ' +
-          chalk.magenta(overrides[pkgMeta.name].path));
-        pkg = new LocalPackage(overrides[pkgMeta.name].path);
-      } else {
-        pkg = new Package(pkgMeta.name, matchingPkg.version, {
-          registry: opts.registry
-        });
-      }
-      pkg.streamFile(pkgMeta.file)
-        .then(stream => cb(null, {
-          stream: stream,
-          maxAge: isOverriden ?
-            0 : plugin.plugins['file-max-age'].getByPath(pkgMeta.file)
-        }))
-        .catch(cb);
+      getPackageLoader(pkgMeta, matchingPkg, opts, function(err, pkg, isOverriden) {
+        if (err) return cb(err);
+
+        pkg.streamFile(pkgMeta.file)
+          .then(stream => cb(null, {
+            stream: stream,
+            maxAge: isOverriden ?
+              0 : plugin.plugins['file-max-age'].getByPath(pkgMeta.file)
+          }))
+          .catch(cb);
+      });
     }
 
-    if (overrides[pkgMeta.name]) {
-      downloadFile(overrides[pkgMeta.name].pkg);
-      return;
-    }
-
-    registry.resolve(pkgMeta.name, pkgMeta.version)
+    getMatchingPkg(registry, pkgMeta)
       .then(downloadFile)
       .catch(cb);
   });
