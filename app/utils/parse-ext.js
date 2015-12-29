@@ -1,8 +1,8 @@
 'use strict';
 
 function parseExt(url) {
-  var parts = url.split('.');
-  var ext = parts.pop();
+  let parts = url.split('.');
+  let ext = parts.pop();
   return {
     path: parts.join('.'),
     ext: ext

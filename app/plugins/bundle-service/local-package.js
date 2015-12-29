@@ -14,7 +14,7 @@ LocalPackage.prototype.readFile = function(filename) {
 
 LocalPackage.prototype.streamFile = function(filename) {
   return new Promise(function(resolve, reject) {
-    var file = path.resolve(this._src, filename);
+    let file = path.resolve(this._src, filename);
 
     if (!fs.existsSync(file)) {
       return reject(new Error('File not found: ' + file));

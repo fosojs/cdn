@@ -25,11 +25,11 @@ it will return the resources from your local files system instead of from the np
 If you have a `gulp` task that bundles your resources, you can put the initialization of the cdn server there.
 
 ``` js
-var CdnServer = require('foso-cdn').Server;
+const CdnServer = require('foso-cdn').Server;
 
 gulp.task('develop', function(cb) {
   // ...
-  var server = new Server({
+  let server = new Server({
     src: './'
   });
   server.start().then(cb);

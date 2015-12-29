@@ -1,7 +1,7 @@
 'use strict';
 
-var Boom = require('boom');
-var config = require('../../../config');
+const Boom = require('boom');
+const config = require('../../../config');
 
 module.exports = function(server, opts, next) {
   function rawHandler(req, reply) {
@@ -17,8 +17,8 @@ module.exports = function(server, opts, next) {
       registry = config.get('registry');
     }
 
-    var metaParts = req.params.pkgMeta.split('@');
-    var pkg = {
+    let metaParts = req.params.pkgMeta.split('@');
+    let pkg = {
       name: metaParts[0],
       version: metaParts[1] || 'latest',
       file: req.params.path || '_index.html'

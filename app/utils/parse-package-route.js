@@ -1,9 +1,9 @@
 'use strict';
 
-var R = require('ramda');
+const R = require('ramda');
 
 function parsePackageRoute(packageRoute, extension) {
-  var end = '.' + extension;
+  let end = '.' + extension;
 
   function parseNameVersion(nv) {
     let prefix;
@@ -13,7 +13,7 @@ function parsePackageRoute(packageRoute, extension) {
     } else {
       prefix = '';
     }
-    var parts = nv.split('@');
+    let parts = nv.split('@');
     return {
       name: prefix + parts[0],
       version: parts[1] || '*'
@@ -24,8 +24,8 @@ function parsePackageRoute(packageRoute, extension) {
     return packageRoute.substr(1);
   }*/
   if (packageRoute.indexOf('(') !== -1) {
-    var parts = packageRoute.split('(');
-    var filesPart = parts[1].substr(0, parts[1].length - 1);
+    let parts = packageRoute.split('(');
+    let filesPart = parts[1].substr(0, parts[1].length - 1);
     return R.merge(parseNameVersion(parts[0]), {
       files: filesPart.split('+').map(function(filePath) {
         return filePath.endsWith(end) ? filePath : filePath + end;

@@ -9,7 +9,7 @@ module.exports = function(plugin, opts, next) {
   }
 
   function getByExtension(extension) {
-    var maxAgeTimeSpan = opts.maxAge[extension] || opts.maxAge['default'];
+    let maxAgeTimeSpan = opts.maxAge[extension] || opts.maxAge['default'];
     return timeSpanToSec(maxAgeTimeSpan);
   }
 
@@ -17,7 +17,7 @@ module.exports = function(plugin, opts, next) {
     if (!isNaN(Number(timeSpan))) {
       return timeSpan;
     }
-    var d = new Duration(timeSpan);
+    let d = new Duration(timeSpan);
     return d.seconds();
   }
 

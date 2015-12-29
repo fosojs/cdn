@@ -4,7 +4,7 @@ const parseBundleRoute = require('../../utils/parse-bundle-route');
 const Boom = require('boom');
 const uglify = require('uglify-js');
 const CleanCSS = require('clean-css');
-var config = require('../../../config');
+const config = require('../../../config');
 const R = require('ramda');
 const fullCssUrl = require('../../utils/full-css-url');
 
@@ -13,7 +13,7 @@ exports.register = function(server, opts, next) {
     return next(new Error('opts.resourcesHost is required'));
   }
 
-  var extContentType = {
+  let extContentType = {
     js: 'text/javascript',
     css: 'text/css'
   };
@@ -22,7 +22,7 @@ exports.register = function(server, opts, next) {
 
   function bundleFiles(type, pkgFiles) {
     if (type === 'js') {
-      var bundle = 'window.cdn=window.cdn||{};' +
+      let bundle = 'window.cdn=window.cdn||{};' +
         'cdn.packages=cdn.packages||{};cdn.origin="' + opts.resourcesHost + '"';
       bundle += pkgFiles.reduce(function(memo, pkgFiles) {
         return memo + ';cdn.packages["' + pkgFiles.name +
@@ -49,7 +49,7 @@ exports.register = function(server, opts, next) {
     //cache: 'redisCache',
     expiresIn: opts.internalCacheExpiresIn,
     generateFunc(id, next) {
-      var transformer;
+      let transformer;
       if (id.options.indexOf('min') !== -1) {
         if (id.extension === 'js') {
           transformer = params => R.merge(params, {
@@ -72,7 +72,7 @@ exports.register = function(server, opts, next) {
         }, function(err, pkgFiles) {
           if (err) return next(null, null);
 
-          var content = bundleFiles(id.extension, pkgFiles);
+          let content = bundleFiles(id.extension, pkgFiles);
           next(null, {
             content: content,
             maxAge: R.reduce(

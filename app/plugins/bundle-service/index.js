@@ -55,8 +55,8 @@ exports.register = function(plugin, opts, next) {
             ' resolved to ' +
             chalk.blue(pkgMeta.name + '@' + matchingPkg.version));
         }
-        var pkg;
-        var isOverriden = !!overrides[pkgMeta.name];
+        let pkg;
+        let isOverriden = !!overrides[pkgMeta.name];
         if (isOverriden) {
           debug('The requested package ' + chalk.blue(pkgMeta.name) +
             ' is overriden locally with ' +
@@ -67,7 +67,7 @@ exports.register = function(plugin, opts, next) {
             registry: opts.registry
           });
         }
-        var files = pkgMeta.files;
+        let files = pkgMeta.files;
         if (!files || !files.length) {
           let mainField = mainFields[opts.extension];
           debug('File not specified. Loading main file: ' +
@@ -133,8 +133,8 @@ exports.register = function(plugin, opts, next) {
           ' resolved to ' +
           chalk.blue(pkgMeta.name + '@' + matchingPkg.version));
       }
-      var pkg;
-      var isOverriden = !!overrides[pkgMeta.name];
+      let pkg;
+      let isOverriden = !!overrides[pkgMeta.name];
       if (isOverriden) {
         debug('The requested package ' + chalk.blue(pkgMeta.name) +
           ' is overriden locally with ' +
