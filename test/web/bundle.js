@@ -1,33 +1,17 @@
 'use strict';
 
 const expect = require('chai').expect;
-const fs = require('fs');
-const path = require('path');
 const Hapi = require('hapi');
 const R = require('ramda');
 const bundleService = require('../../app/plugins/bundle-service');
 const fileMaxAge = require('../../app/plugins/file-max-age');
 const bundle = require('../../app/web/bundle');
+const compareToFile = require('./compare-to-file');
 
-function normalizeNewline(str) {
-  if (typeof str !== 'string') {
-    throw new TypeError('Expected a string');
-  }
-
-  return str.replace(/\r\n/g, '\n').replace(/\n*$/, '');
-}
-
-function readFile(fileName) {
-  let filePath = path.join(__dirname, './files', fileName + '.txt');
-  return fs.readFileSync(filePath, 'utf8');
-}
-
-function compareToFile(fileName, payload) {
-  let normalizedPayload = normalizeNewline(payload);
-  let expectedResult = R.compose(normalizeNewline, readFile)(fileName);
-  expect(normalizedPayload.length).to.eq(expectedResult.length);
-  expect(normalizedPayload).to.eq(expectedResult);
-}
+let extensionContentType = {
+  js: 'text/javascript',
+  css: 'text/css',
+};
 
 describe('bundle', function() {
   it('should bundle one file', function(done) {
@@ -46,6 +30,7 @@ describe('bundle', function() {
       register: bundle,
       options: {
         resourcesHost: 'cdn.foso.me',
+        extensionContentType,
       },
     }], function(err) {
       expect(err).to.not.exist;
@@ -54,6 +39,39 @@ describe('bundle', function() {
         compareToFile('test1', res.payload);
         expect(res.headers['content-type']).to.eq('text/javascript; charset=utf-8');
         expect(res.headers['cache-control']).to.eq('max-age=14400');
+        expect(res.headers['access-control-allow-origin']).to.eq('*');
+
+        done();
+      });
+    });
+  });
+
+  it('should set max age', function(done) {
+    let server = new Hapi.Server();
+    server.connection();
+    server.register([{
+      register: fileMaxAge,
+      options: {
+        maxAge: {
+          'default': '4h',
+          js: '1h',
+        },
+      },
+    }, {
+      register: bundleService,
+    }, {
+      register: bundle,
+      options: {
+        resourcesHost: 'cdn.foso.me',
+        extensionContentType,
+      },
+    }], function(err) {
+      expect(err).to.not.exist;
+
+      server.inject('/bundle/applyq@0.2.1(index).js', function(res) {
+        compareToFile('test1', res.payload);
+        expect(res.headers['content-type']).to.eq('text/javascript; charset=utf-8');
+        expect(res.headers['cache-control']).to.eq('max-age=3600');
         expect(res.headers['access-control-allow-origin']).to.eq('*');
 
         done();
@@ -77,6 +95,7 @@ describe('bundle', function() {
       register: bundle,
       options: {
         resourcesHost: 'cdn.foso.me',
+        extensionContentType,
       },
     }], function(err) {
       expect(err).to.not.exist;
@@ -108,6 +127,7 @@ describe('bundle', function() {
       register: bundle,
       options: {
         resourcesHost: 'cdn.foso.me',
+        extensionContentType,
       },
     }], function(err) {
       expect(err).to.not.exist;
@@ -139,6 +159,7 @@ describe('bundle', function() {
       register: bundle,
       options: {
         resourcesHost: 'cdn.foso.me',
+        extensionContentType,
       },
     }], function(err) {
       expect(err).to.not.exist;
@@ -170,6 +191,7 @@ describe('bundle', function() {
       register: bundle,
       options: {
         resourcesHost: 'cdn.foso.me',
+        extensionContentType,
       },
     }], function(err) {
       expect(err).to.not.exist;
@@ -201,6 +223,7 @@ describe('bundle', function() {
       register: bundle,
       options: {
         resourcesHost: 'cdn.foso.me',
+        extensionContentType,
       },
     }], function(err) {
       expect(err).to.not.exist;
@@ -232,6 +255,7 @@ describe('bundle', function() {
       register: bundle,
       options: {
         resourcesHost: 'cdn.foso.me',
+        extensionContentType,
       },
     }], function(err) {
       expect(err).to.not.exist;
@@ -263,6 +287,7 @@ describe('bundle', function() {
       register: bundle,
       options: {
         resourcesHost: 'cdn.foso.me',
+        extensionContentType,
       },
     }], function(err) {
       expect(err).to.not.exist;
@@ -294,6 +319,7 @@ describe('bundle', function() {
       register: bundle,
       options: {
         resourcesHost: 'cdn.foso.me',
+        extensionContentType,
       },
     }], function(err) {
       expect(err).to.not.exist;

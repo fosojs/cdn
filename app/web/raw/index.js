@@ -2,8 +2,11 @@
 
 const Boom = require('boom');
 const config = require('../../../config');
+const parseExt = require('../../utils/parse-ext');
 
 module.exports = function(server, opts, next) {
+  let extContentType = opts.extensionContentType || {};
+
   function rawHandler(req, reply) {
     let registry;
     if (req.params.account) {
@@ -31,6 +34,7 @@ module.exports = function(server, opts, next) {
         return reply(Boom.notFound(err));
       }
       reply(result.stream)
+        .type(extContentType[parseExt(pkg.file).ext])
         .header('cache-control', 'max-age=' + result.maxAge)
         .header('Access-Control-Allow-Origin', '*');
     });

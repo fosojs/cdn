@@ -33,6 +33,11 @@ CdnServer.prototype.start = function() {
     });
     server.connection({ port: this._port });
 
+    let extensionContentType = {
+      js: 'text/javascript',
+      css: 'text/css',
+    };
+
     server.register([
       {
         register: require('./app/plugins/registry'),
@@ -57,10 +62,16 @@ CdnServer.prototype.start = function() {
         options: {
           resourcesHost: config.get('host') ||
             config.get('ip') + ':' + this._port,
-          internalCacheExpiresIn: this._internalCacheExpiresIn
-        }
+          internalCacheExpiresIn: this._internalCacheExpiresIn,
+          extensionContentType,
+        },
       },
-      { register: require('./app/web/raw') }
+      {
+        register: require('./app/web/raw'),
+        options: {
+          extensionContentType,
+        },
+      }
     ], function(err) {
       if (err) reject(err);
 

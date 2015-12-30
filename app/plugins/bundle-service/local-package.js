@@ -2,7 +2,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const streamToString = require('./stream-to-string');
+const streamToString = require('stream-to-string');
 
 function LocalPackage(src) {
   this._src = src;

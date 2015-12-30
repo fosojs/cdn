@@ -9,14 +9,10 @@ const R = require('ramda');
 const fullCssUrl = require('../../utils/full-css-url');
 
 exports.register = function(server, opts, next) {
+  let extContentType = opts.extensionContentType || {};
   if (!opts.resourcesHost) {
     return next(new Error('opts.resourcesHost is required'));
   }
-
-  let extContentType = {
-    js: 'text/javascript',
-    css: 'text/css'
-  };
 
   let Registry = server.plugins.registry;
 

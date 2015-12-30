@@ -12,7 +12,7 @@ const config = require('../../../config');
 const normalize = require('normalize-path');
 const chalk = require('chalk');
 const debug = require('debug')('cdn');
-const streamToString = require('./stream-to-string');
+const streamToString = require('stream-to-string');
 
 let regClient = new RegClient();
 
