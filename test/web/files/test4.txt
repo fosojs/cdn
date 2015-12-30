@@ -1,0 +1,56 @@
+window.cdn=window.cdn||{};cdn.packages=cdn.packages||{};cdn.origin="cdn.foso.me";cdn.packages["lodash"]={version:"3.10.1"};var map = require('./map'),
+    property = require('../utility/property');
+
+/**
+ * Gets the property value of `path` from all elements in `collection`.
+ *
+ * @static
+ * @memberOf _
+ * @category Collection
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Array|string} path The path of the property to pluck.
+ * @returns {Array} Returns the property values.
+ * @example
+ *
+ * var users = [
+ *   { 'user': 'barney', 'age': 36 },
+ *   { 'user': 'fred',   'age': 40 }
+ * ];
+ *
+ * _.pluck(users, 'user');
+ * // => ['barney', 'fred']
+ *
+ * var userIndex = _.indexBy(users, 'user');
+ * _.pluck(userIndex, 'age');
+ * // => [36, 40] (iteration order is not guaranteed)
+ */
+function pluck(collection, path) {
+  return map(collection, property(path));
+}
+
+module.exports = pluck;
+;module.exports = {
+  'camelCase': require('./string/camelCase'),
+  'capitalize': require('./string/capitalize'),
+  'deburr': require('./string/deburr'),
+  'endsWith': require('./string/endsWith'),
+  'escape': require('./string/escape'),
+  'escapeRegExp': require('./string/escapeRegExp'),
+  'kebabCase': require('./string/kebabCase'),
+  'pad': require('./string/pad'),
+  'padLeft': require('./string/padLeft'),
+  'padRight': require('./string/padRight'),
+  'parseInt': require('./string/parseInt'),
+  'repeat': require('./string/repeat'),
+  'snakeCase': require('./string/snakeCase'),
+  'startCase': require('./string/startCase'),
+  'startsWith': require('./string/startsWith'),
+  'template': require('./string/template'),
+  'templateSettings': require('./string/templateSettings'),
+  'trim': require('./string/trim'),
+  'trimLeft': require('./string/trimLeft'),
+  'trimRight': require('./string/trimRight'),
+  'trunc': require('./string/trunc'),
+  'unescape': require('./string/unescape'),
+  'words': require('./string/words')
+};
