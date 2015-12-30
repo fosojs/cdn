@@ -72,10 +72,10 @@ exports.register = function(plugin, opts, next) {
       registry: opts.registry
     });
     return getMatchingPkg(registry, opts.pkgMeta)
-      .then(function(matchingPkg) {
-        mpkg = matchingPkg;
-        return getPackageLoader(opts.pkgMeta, matchingPkg, opts);
-      })
+      .then(R.compose(
+        matchingPkg => getPackageLoader(opts.pkgMeta, matchingPkg, opts),
+        R.tap(value => mpkg = value))
+      )
       .then(res => Promise.resolve(R.merge(res, {matchingPkg: mpkg})));
   }
 
@@ -91,7 +91,27 @@ exports.register = function(plugin, opts, next) {
       throw new Error('opts.transformer is required');
     }
 
+    let end = '.' + opts.extension;
+
     async.series(packages.map((pkgMeta) => function(cb) {
+      function getMainFile(matchingPkg) {
+        let mainField = mainFields[opts.extension];
+        let mainFile = matchingPkg[mainField];
+        debug('File not specified. Loading main file: ' +
+          chalk.magenta(mainFile));
+        if (mainFile.indexOf(end) !== -1)
+          return mainFile;
+
+        return mainFile + end;
+      }
+
+      function getFiles(matchingPkg) {
+        if (pkgMeta.files && pkgMeta.files.length)
+          return pkgMeta.files;
+
+        return [getMainFile(matchingPkg)];
+      }
+
       fetchResources({
         pkgMeta,
         registry: opts.registry,
@@ -99,18 +119,7 @@ exports.register = function(plugin, opts, next) {
         let matchingPkg = params.matchingPkg;
         let isOverriden = params.isOverriden;
         let pkg = params.pkg;
-        let files = pkgMeta.files;
-        if (!files || !files.length) {
-          let mainField = mainFields[opts.extension];
-          debug('File not specified. Loading main file: ' +
-            chalk.magenta(matchingPkg[mainField]));
-          let mainFile = matchingPkg[mainField];
-          let end = '.' + opts.extension;
-          if (mainFile.indexOf(end) === -1) {
-            mainFile += end;
-          }
-          files = [mainFile];
-        }
+        let files = getFiles(matchingPkg);
         async.series(files.map(filePath => function(cb) {
           pkg.readFile(filePath)
             .then(content => cb(null, opts.transformer({
@@ -145,21 +154,20 @@ exports.register = function(plugin, opts, next) {
       throw new Error('opts.registry is required');
     }
 
+    let isOverriden;
     fetchResources({
       pkgMeta,
       registry: opts.registry,
     })
-    .then(function(params) {
-      let isOverriden = params.isOverriden;
-      let pkg = params.pkg;
-      pkg.streamFile(pkgMeta.file)
-        .then(stream => cb(null, {
-          stream,
-          maxAge: isOverriden ?
-            0 : plugin.plugins['file-max-age'].getByPath(pkgMeta.file)
-        }))
-        .catch(cb);
-    })
+    .then(R.compose(
+      params => params.pkg.streamFile(pkgMeta.file),
+      R.tap(params => isOverriden = params.isOverriden)
+    ))
+    .then(stream => cb(null, {
+      stream,
+      maxAge: isOverriden ?
+        0 : plugin.plugins['file-max-age'].getByPath(pkgMeta.file)
+    }))
     .catch(cb);
   });
 
