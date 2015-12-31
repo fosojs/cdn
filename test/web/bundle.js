@@ -229,7 +229,7 @@ describe('bundle', function() {
     }], function(err) {
       expect(err).to.not.exist;
 
-      server.inject('/bundle/lodash@3.10.1(collection/pluck+string).js', function(res) {
+      server.inject('/bundle/test-foo@1.0.1(lib/sum+lib/includes).js', function(res) {
         compareToFile('test4', res.payload);
         expect(res.headers['content-type']).to.eq('text/javascript; charset=utf-8');
         expect(res.headers['cache-control']).to.eq('max-age=14400');
@@ -293,7 +293,7 @@ describe('bundle', function() {
     }], function(err) {
       expect(err).to.not.exist;
 
-      server.inject('/bundle/semantic-ui@2.1.6(dist/components/feed+dist/components/comment).css', function(res) {
+      server.inject('/bundle/test-foo@1.0.1(styles/bg+styles/font).css', function(res) {
         compareToFile('test5', res.payload);
         expect(res.headers['content-type']).to.eq('text/css; charset=utf-8');
         expect(res.headers['cache-control']).to.eq('max-age=14400');
@@ -325,7 +325,7 @@ describe('bundle', function() {
     }], function(err) {
       expect(err).to.not.exist;
 
-      server.inject('/bundle/semantic-ui@2.1.6(dist/components/feed+dist/components/comment).min.css', function(res) {
+      server.inject('/bundle/test-foo@1.0.1(styles/bg+styles/font).min.css', function(res) {
         compareToFile('test5.min', res.payload);
         expect(res.headers['content-type']).to.eq('text/css; charset=utf-8');
         expect(res.headers['cache-control']).to.eq('max-age=14400');
