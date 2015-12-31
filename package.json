@@ -74,6 +74,7 @@
   },
   "devDependencies": {
     "chai": "^3.4.1",
+    "decamelize": "^1.1.2",
     "gitbook-cli": "^1.0.1",
     "gulp": "^3.9.0",
     "gulp-clean": "^0.3.1",
