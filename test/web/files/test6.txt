@@ -1,0 +1,1 @@
+window.cdn=window.cdn||{};cdn.packages=cdn.packages||{};cdn.origin="cdn.foso.me";cdn.packages["local-pkg"]={version:"1.0.0"};console.log('local pkg. Hello world!');

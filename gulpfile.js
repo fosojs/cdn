@@ -16,7 +16,7 @@ gulp.task('pre-test', function() {
 gulp.task('test', ['pre-test'], function(cb) {
   let mochaErr;
 
-  gulp.src('test/**/*.js')
+  gulp.src(['test/**/*.js', '!**/local-pkg/**'])
     .pipe(plumber())
     .pipe(mocha({reporter: 'spec'}))
     .on('error', (err) => mochaErr = err)

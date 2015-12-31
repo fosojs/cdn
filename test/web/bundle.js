@@ -7,6 +7,7 @@ const bundleService = require('../../app/plugins/bundle-service');
 const fileMaxAge = require('../../app/plugins/file-max-age');
 const bundle = require('../../app/web/bundle');
 const compareToFile = require('./compare-to-file');
+const path = require('path');
 
 let extensionContentType = {
   js: 'text/javascript',
@@ -328,6 +329,41 @@ describe('bundle', function() {
         compareToFile('test5.min', res.payload);
         expect(res.headers['content-type']).to.eq('text/css; charset=utf-8');
         expect(res.headers['cache-control']).to.eq('max-age=14400');
+        expect(res.headers['access-control-allow-origin']).to.eq('*');
+
+        done();
+      });
+    });
+  });
+
+  it('should bundle local package', function(done) {
+    let server = new Hapi.Server();
+    server.connection();
+    server.register([{
+      register: fileMaxAge,
+      options: {
+        maxAge: {
+          'default': '4h',
+        },
+      },
+    }, {
+      register: bundleService,
+      options: {
+        overridePath: path.resolve(__dirname, './local-pkg'),
+      },
+    }, {
+      register: bundle,
+      options: {
+        resourcesHost: 'cdn.foso.me',
+        extensionContentType,
+      },
+    }], function(err) {
+      expect(err).to.not.exist;
+
+      server.inject('/bundle/local-pkg@1.0.0(index).js', function(res) {
+        compareToFile('test6', res.payload);
+        expect(res.headers['content-type']).to.eq('text/javascript; charset=utf-8');
+        expect(res.headers['cache-control']).to.eq('max-age=0');
         expect(res.headers['access-control-allow-origin']).to.eq('*');
 
         done();

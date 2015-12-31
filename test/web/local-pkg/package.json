@@ -1,0 +1,18 @@
+{
+  "name": "local-pkg",
+  "version": "1.0.0",
+  "description": "local-pkg",
+  "main": "index.js",
+  "scripts": {
+  },
+  "author": {
+    "name": "Zoltan Kochan",
+    "email": "zoltan.kochan@gmail.com",
+    "url": "http://kochan.io"
+  },
+  "license": "MIT",
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}
