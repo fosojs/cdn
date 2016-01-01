@@ -9,11 +9,6 @@ const raw = require('../../app/web/raw');
 const compareToFile = require('./compare-to-file');
 const streamToString = require('stream-to-string');
 
-let extensionContentType = {
-  js: 'text/javascript',
-  css: 'text/css',
-};
-
 describe('raw', function() {
   it('should return js file', function(done) {
     let server = new Hapi.Server();
@@ -29,15 +24,12 @@ describe('raw', function() {
       register: bundleService,
     }, {
       register: raw,
-      options: {
-        extensionContentType,
-      },
     }], function(err) {
       expect(err).to.not.exist;
 
       server.inject('/raw/applyq@0.2.1/index.js', function(res) {
         compareToFile('raw-test1', res.payload);
-        expect(res.headers['content-type']).to.eq('text/javascript; charset=utf-8');
+        expect(res.headers['content-type']).to.eq('application/javascript; charset=utf-8');
         expect(res.headers['cache-control']).to.eq('max-age=14400');
         expect(res.headers['access-control-allow-origin']).to.eq('*');
 

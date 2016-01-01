@@ -9,7 +9,6 @@ const R = require('ramda');
 const fullCssUrl = require('../../utils/full-css-url');
 
 exports.register = function(server, opts, next) {
-  let extContentType = opts.extensionContentType || {};
   if (!opts.resourcesHost) {
     return next(new Error('opts.resourcesHost is required'));
   }
@@ -107,7 +106,7 @@ exports.register = function(server, opts, next) {
           return reply(Boom.notFound(err));
 
         reply(result.content)
-          .type(extContentType[bundle.extension])
+          .type(server.mime.path(req.params.bundleRoute).type)
           .header('cache-control', 'max-age=' + result.maxAge)
           .header('Access-Control-Allow-Origin', '*');
       });

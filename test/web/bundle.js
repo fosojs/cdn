@@ -15,10 +15,6 @@ let defaultParams = {
     'default': '4h',
   },
   resourcesHost: 'cdn.foso.me',
-  extensionContentType: {
-    js: 'text/javascript',
-    css: 'text/css',
-  },
   expected: {
     headers: {
       cacheControl: 'max-age=14400',
@@ -34,7 +30,7 @@ let tests = [
     expected: {
       fileName: 'test1',
       headers: {
-        contentType: 'text/javascript; charset=utf-8',
+        contentType: 'application/javascript; charset=utf-8',
       },
     },
   },
@@ -48,7 +44,7 @@ let tests = [
       fileName: 'test1',
       headers: {
         cacheControl: 'max-age=3600',
-        contentType: 'text/javascript; charset=utf-8',
+        contentType: 'application/javascript; charset=utf-8',
       },
     },
   },
@@ -58,7 +54,7 @@ let tests = [
     expected: {
       fileName: 'test2',
       headers: {
-        contentType: 'text/javascript; charset=utf-8',
+        contentType: 'application/javascript; charset=utf-8',
       },
     },
   },
@@ -68,7 +64,7 @@ let tests = [
     expected: {
       fileName: 'test1',
       headers: {
-        contentType: 'text/javascript; charset=utf-8',
+        contentType: 'application/javascript; charset=utf-8',
       },
     },
   },
@@ -78,7 +74,7 @@ let tests = [
     expected: {
       fileName: 'test1',
       headers: {
-        contentType: 'text/javascript; charset=utf-8',
+        contentType: 'application/javascript; charset=utf-8',
       },
     },
   },
@@ -88,7 +84,7 @@ let tests = [
     expected: {
       fileName: 'test3',
       headers: {
-        contentType: 'text/javascript; charset=utf-8',
+        contentType: 'application/javascript; charset=utf-8',
       },
     },
   },
@@ -98,7 +94,7 @@ let tests = [
     expected: {
       fileName: 'test4',
       headers: {
-        contentType: 'text/javascript; charset=utf-8',
+        contentType: 'application/javascript; charset=utf-8',
       },
     },
   },
@@ -108,7 +104,7 @@ let tests = [
     expected: {
       fileName: 'test1.min',
       headers: {
-        contentType: 'text/javascript; charset=utf-8',
+        contentType: 'application/javascript; charset=utf-8',
       },
     },
   },
@@ -139,7 +135,7 @@ let tests = [
     expected: {
       fileName: 'test6',
       headers: {
-        contentType: 'text/javascript; charset=utf-8',
+        contentType: 'application/javascript; charset=utf-8',
       },
     },
   },
@@ -165,7 +161,6 @@ describe('bundle', function() {
         register: bundle,
         options: {
           resourcesHost: test.resourcesHost,
-          extensionContentType: test.extensionContentType,
         },
       }], function(err) {
         expect(err).to.not.exist;
