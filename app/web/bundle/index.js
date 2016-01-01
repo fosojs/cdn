@@ -42,16 +42,19 @@ exports.register = function(server, opts, next) {
     generateFunc: (id, next) => Registry.getByName(id, next),
   });
 
-  function getTransformer(opts) {
+  function getJavaScriptTransformer(opts) {
     if (opts.options.indexOf('min') === -1)
       return code => code;
 
-    if (opts.extension === 'js') {
-      let minify = code => uglify.minify(code, {fromString: true}).code;
-      return params => R.merge(params, {
-        content: minify(params.content)
-      });
-    }
+    let minify = code => uglify.minify(code, {fromString: true}).code;
+    return params => R.merge(params, {
+      content: minify(params.content)
+    });
+  }
+
+  function getCSSTransformer(opts) {
+    if (opts.options.indexOf('min') === -1)
+      return fullCssUrl;
 
     let minify = code => new CleanCSS().minify(code).styles;
     let minifyTransformer = params => R.merge(params, {
@@ -59,6 +62,12 @@ exports.register = function(server, opts, next) {
     });
     return R.compose(minifyTransformer, fullCssUrl);
   }
+
+  let getTransformer = R.ifElse(
+    opts => opts.extension === 'js',
+    getJavaScriptTransformer,
+    getCSSTransformer
+  );
 
   let bundleCache = server.cache({
     //cache: 'redisCache',

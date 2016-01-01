@@ -1,5 +1,5 @@
 .eric-cartman {
-  background: url(../img/eric.png);
+  background: url("/raw/test-foo@1.0.1/img/eric.png");
 }
 pre, code, kbd, samp {
   font-family: monospace, sans-serif;
