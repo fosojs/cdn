@@ -69,8 +69,7 @@
     "tar-fs": "^1.8.1",
     "uglify-js": "^2.6.1",
     "update-notifier": "^0.6.0",
-    "yaml-or-json": "^0.1.0",
-    "zlib": "^1.0.5"
+    "yaml-or-json": "^0.1.0"
   },
   "devDependencies": {
     "chai": "^3.4.1",
