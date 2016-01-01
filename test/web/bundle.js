@@ -10,9 +10,21 @@ const compareToFile = require('./compare-to-file');
 const path = require('path');
 const decamelize = require('decamelize');
 
-let extensionContentType = {
-  js: 'text/javascript',
-  css: 'text/css',
+let defaultParams = {
+  maxAge: {
+    'default': '4h',
+  },
+  resourcesHost: 'cdn.foso.me',
+  extensionContentType: {
+    js: 'text/javascript',
+    css: 'text/css',
+  },
+  expected: {
+    headers: {
+      cacheControl: 'max-age=14400',
+      accessControlAllowOrigin: '*',
+    },
+  },
 };
 
 let tests = [
@@ -132,20 +144,6 @@ let tests = [
     },
   },
 ];
-
-let defaultParams = {
-  maxAge: {
-    'default': '4h',
-  },
-  resourcesHost: 'cdn.foso.me',
-  extensionContentType,
-  expected: {
-    headers: {
-      cacheControl: 'max-age=14400',
-      accessControlAllowOrigin: '*',
-    },
-  },
-};
 
 describe('bundle', function() {
   tests.forEach(function(opts) {

@@ -7,17 +7,20 @@ const parseExt = require('../../utils/parse-ext');
 module.exports = function(server, opts, next) {
   let extContentType = opts.extensionContentType || {};
 
+  function getRegistry(account) {
+    if (!account) {
+      return config.get('registry');
+    }
+    if (config.get('accounts') && config.get('accounts')[account]) {
+      return config.get('accounts')[account].registry;
+    }
+    return null;
+  }
+
   function rawHandler(req, reply) {
-    let registry;
-    if (req.params.account) {
-      if (config.get('accounts') &&
-        config.get('accounts')[req.params.account]) {
-        registry = config.get('accounts')[req.params.account].registry;
-      } else {
-        return reply(Boom.notFound('Passed account not found'));
-      }
-    } else {
-      registry = config.get('registry');
+    let registry = getRegistry(req.params.account);
+    if (!registry) {
+      return reply(Boom.notFound('Passed account not found'));
     }
 
     let metaParts = req.params.pkgMeta.split('@');

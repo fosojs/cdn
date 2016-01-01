@@ -16,54 +16,59 @@ exports.register = function(server, opts, next) {
 
   let Registry = server.plugins.registry;
 
-  function bundleFiles(type, pkgFiles) {
-    if (type === 'js') {
-      let bundle = 'window.cdn=window.cdn||{};' +
-        'cdn.packages=cdn.packages||{};cdn.origin="' + opts.resourcesHost + '"';
-      bundle += pkgFiles.reduce(function(memo, pkgFiles) {
-        return memo + ';cdn.packages["' + pkgFiles.name +
-          '"]={version:"' + pkgFiles.version + '"};' +
-          pkgFiles.files.join(';');
-      }, '');
-      return bundle;
-    }
+  function bundleJavaScript(type, pkgFiles) {
+    let bundleHeader = 'window.cdn=window.cdn||{};' +
+      'cdn.packages=cdn.packages||{};cdn.origin="' + opts.resourcesHost + '"';
     return pkgFiles.reduce(function(memo, pkgFiles) {
-      return memo + pkgFiles.files.join('');
-    }, '');
+      return memo + ';cdn.packages["' + pkgFiles.name +
+        '"]={version:"' + pkgFiles.version + '"};' +
+        pkgFiles.files.join(';');
+    }, bundleHeader);
   }
+
+  function bundleCSS(type, pkgFiles) {
+    return R.compose(R.join(''), R.flatten, R.pluck('files'))(pkgFiles);
+  }
+
+  let bundleFiles = R.ifElse(
+    (type) => type === 'js',
+    bundleJavaScript,
+    bundleCSS
+  );
 
   let registryCache = server.cache({
     expiresIn: opts.internalCacheExpiresIn,
     generateTimeout: 1000 * 10,
     segment: 'registrySegment',
-    generateFunc(id, next) {
-      Registry.getByName(id, next);
-    },
+    generateFunc: (id, next) => Registry.getByName(id, next),
   });
+
+  function getTransformer(opts) {
+    if (opts.options.indexOf('min') === -1)
+      return code => code;
+
+    if (opts.extension === 'js') {
+      let minify = code => uglify.minify(code, {fromString: true}).code;
+      return params => R.merge(params, {
+        content: minify(params.content)
+      });
+    }
+
+    let minify = code => new CleanCSS().minify(code).styles;
+    let minifyTransformer = params => R.merge(params, {
+      content: minify(params.content)
+    });
+    return R.compose(minifyTransformer, fullCssUrl);
+  }
 
   let bundleCache = server.cache({
     //cache: 'redisCache',
     expiresIn: opts.internalCacheExpiresIn,
     generateFunc(id, next) {
-      let transformer;
-      if (id.options.indexOf('min') !== -1) {
-        if (id.extension === 'js') {
-          transformer = params => R.merge(params, {
-            content: uglify.minify(params.content, {fromString: true}).code
-          });
-        } else {
-          let minifyTransformer = params => R.merge(params, {
-            content: new CleanCSS().minify(params.content).styles
-          });
-          transformer = R.compose(minifyTransformer, fullCssUrl);
-        }
-      } else {
-        transformer = code => code;
-      }
       server.plugins['bundle-service']
         .get(id.paths, {
           extension: id.extension,
-          transformer: transformer,
+          transformer: getTransformer(id),
           registry: id.registry
         }, function(err, pkgFiles) {
           if (err) return next(null, null);
