@@ -8,6 +8,10 @@ Inspired by [npm-cdn](https://github.com/zeke/npm-cdn),
 [brcdn.org](https://github.com/ForbesLindesay/brcdn.org) and
 [jsdelivr](http://www.jsdelivr.com/).
 
+[![Dependency Status](https://david-dm.org/fosojs/cdn/status.svg?style=flat)](https://david-dm.org/fosojs/cdn)
+[![Build Status](https://travis-ci.org/fosojs/cdn.svg?branch=master)](https://travis-ci.org/fosojs/cdn)
+[![npm version](https://badge.fury.io/js/foso-cdn.svg)](http://badge.fury.io/js/foso-cdn)
+
 
 ## Installation
 
