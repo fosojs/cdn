@@ -6,6 +6,7 @@ const R = require('ramda');
 const bundleService = require('../../app/plugins/bundle-service');
 const fileMaxAge = require('../../app/plugins/file-max-age');
 const bundle = require('../../app/web/bundle');
+const registry = require('../../app/plugins/registry');
 const compareToFile = require('./compare-to-file');
 const path = require('path');
 const decamelize = require('decamelize');
@@ -148,6 +149,8 @@ describe('bundle', function() {
       let server = new Hapi.Server();
       server.connection();
       server.register([{
+        register: registry,
+      }, {
         register: fileMaxAge,
         options: {
           maxAge: test.maxAge,

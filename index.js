@@ -13,6 +13,7 @@ function CdnServer(opts) {
   this._src = opts.src;
   this._port = opts.port || config.get('port');
   this._internalCacheExpiresIn = opts.internalCacheExpiresIn || 1;
+  this._plugins = opts.plugins;
 }
 
 CdnServer.prototype.start = function() {
@@ -34,11 +35,9 @@ CdnServer.prototype.start = function() {
     server.connection({ port: this._port });
 
     server.register([
+      ...this._plugins,
       {
         register: require('./app/plugins/registry'),
-        options: {
-          mongoURI: config.get('mongodbUrl'),
-        },
       },
       {
         register: require('./app/plugins/file-max-age'),
@@ -62,7 +61,7 @@ CdnServer.prototype.start = function() {
       },
       {
         register: require('./app/web/raw'),
-      }
+      },
     ], function(err) {
       if (err) reject(err);
 

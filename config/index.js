@@ -1,6 +1,5 @@
 'use strict';
 
-const util = require('util');
 const fs = require('fs');
 const yamlOrJSON = require('yaml-or-json');
 const convict = require('convict');
@@ -41,23 +40,6 @@ let config = convict({
       default: 'http://registry.npmjs.org/',
     },
   },
-  mongodb: {
-    address: {
-      doc: 'MongoDB address.',
-      default: 'localhost',
-      env: 'MONGO_PORT_27017_TCP_ADDR'
-    },
-    port: {
-      doc: 'MongoDB port.',
-      format: 'port',
-      default: '27017',
-      env: 'MONGO_PORT_27017_TCP_PORT'
-    },
-    name: {
-      doc: 'MongoDB DB name.',
-      default: 'sitegate-registry-dev'
-    }
-  },
 });
 
 let env = config.get('env');
@@ -70,16 +52,6 @@ try {
 }
 
 config.load(configFile);
-
-// Adding the calculated values
-config.load({
-  mongodbUrl: util.format(
-    'mongodb://%s:%s/%s',
-    config.get('mongodb.address'),
-    config.get('mongodb.port'),
-    config.get('mongodb.name')
-  ),
-});
 
 config.validate();
 

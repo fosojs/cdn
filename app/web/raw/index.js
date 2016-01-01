@@ -5,22 +5,9 @@ const config = require('../../../config');
 const parseExt = require('../../utils/parse-ext');
 
 module.exports = function(server, opts, next) {
-  function getRegistry(account) {
-    if (!account) {
-      return config.get('registry');
-    }
-    if (config.get('accounts') && config.get('accounts')[account]) {
-      return config.get('accounts')[account].registry;
-    }
-    return null;
-  }
+  let registry = server.plugins.registry;
 
   function rawHandler(req, reply) {
-    let registry = getRegistry(req.params.account);
-    if (!registry) {
-      return reply(Boom.notFound('Passed account not found'));
-    }
-
     let metaParts = req.params.pkgMeta.split('@');
     let pkg = {
       name: metaParts[0],
@@ -29,7 +16,7 @@ module.exports = function(server, opts, next) {
     };
 
     server.plugins['bundle-service'].getRaw(pkg, {
-      registry: registry
+      registry: req.pre.registry,
     }, function(err, result) {
       if (err) {
         return reply(Boom.notFound(err));
@@ -44,12 +31,18 @@ module.exports = function(server, opts, next) {
   server.route({
     method: 'GET',
     path: '/raw/{pkgMeta}/{path*}',
+    config: {
+      pre: [registry.pre],
+    },
     handler: rawHandler
   });
 
   server.route({
     method: 'GET',
     path: '/{account}/raw/{pkgMeta}/{path*}',
+    config: {
+      pre: [registry.pre],
+    },
     handler: rawHandler
   });
 
@@ -58,5 +51,5 @@ module.exports = function(server, opts, next) {
 
 module.exports.attributes = {
   name: 'web/raw',
-  dependencies: ['bundle-service', 'file-max-age']
+  dependencies: ['bundle-service', 'file-max-age', 'registry']
 };

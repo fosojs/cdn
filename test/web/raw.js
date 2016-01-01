@@ -8,12 +8,15 @@ const fileMaxAge = require('../../app/plugins/file-max-age');
 const raw = require('../../app/web/raw');
 const compareToFile = require('./compare-to-file');
 const streamToString = require('stream-to-string');
+const registry = require('../../app/plugins/registry');
 
 describe('raw', function() {
   it('should return js file', function(done) {
     let server = new Hapi.Server();
     server.connection();
     server.register([{
+        register: registry,
+      }, {
       register: fileMaxAge,
       options: {
         maxAge: {

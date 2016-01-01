@@ -13,7 +13,7 @@ exports.register = function(server, opts, next) {
     return next(new Error('opts.resourcesHost is required'));
   }
 
-  let Registry = server.plugins.registry;
+  let registry = server.plugins.registry;
 
   function bundleJavaScript(type, pkgFiles) {
     let bundleHeader = 'window.cdn=window.cdn||{};' +
@@ -34,13 +34,6 @@ exports.register = function(server, opts, next) {
     bundleJavaScript,
     bundleCSS
   );
-
-  let registryCache = server.cache({
-    expiresIn: opts.internalCacheExpiresIn,
-    generateTimeout: 1000 * 10,
-    segment: 'registrySegment',
-    generateFunc: (id, next) => Registry.getByName(id, next),
-  });
 
   function getJavaScriptTransformer(opts) {
     if (opts.options.indexOf('min') === -1)
@@ -95,42 +88,37 @@ exports.register = function(server, opts, next) {
     generateTimeout: 1000 * 10 /* 10 seconds */
   });
 
-  function getRegistry(name, cb) {
-    if (name) return registryCache.get(name, cb);
-
-    cb(null, config.get('registry'));
-  }
-
   function bundleHandler(req, reply) {
-    getRegistry(req.params.account, function(err, registry) {
-      if (err)
-        return reply(Boom.notFound('Passed account not found'));
+    let bundle = parseBundleRoute(req.params.bundleRoute);
 
-      let bundle = parseBundleRoute(req.params.bundleRoute);
+    bundle.registry = req.pre.registry;
+    bundle.id = req.params.account + '/' + req.params.bundleRoute;
+    bundleCache.get(bundle, function(err, result) {
+      if (err || !result || !result.content)
+        return reply(Boom.notFound(err));
 
-      bundle.registry = registry;
-      bundle.id = req.params.account + '/' + req.params.bundleRoute;
-      bundleCache.get(bundle, function(err, result) {
-        if (err || !result || !result.content)
-          return reply(Boom.notFound(err));
-
-        reply(result.content)
-          .type(server.mime.path(req.params.bundleRoute).type)
-          .header('cache-control', 'max-age=' + result.maxAge)
-          .header('Access-Control-Allow-Origin', '*');
-      });
+      reply(result.content)
+        .type(server.mime.path(req.params.bundleRoute).type)
+        .header('cache-control', 'max-age=' + result.maxAge)
+        .header('Access-Control-Allow-Origin', '*');
     });
   }
 
   server.route({
     method: 'GET',
     path: '/bundle/{bundleRoute*}',
+    config: {
+      pre: [registry.pre],
+    },
     handler: bundleHandler
   });
 
   server.route({
     method: 'GET',
     path: '/{account}/bundle/{bundleRoute*}',
+    config: {
+      pre: [registry.pre],
+    },
     handler: bundleHandler
   });
 
@@ -139,5 +127,5 @@ exports.register = function(server, opts, next) {
 
 exports.register.attributes = {
   name: 'app/bundle',
-  dependencies: ['bundle-service']
+  dependencies: ['bundle-service', 'registry'],
 };
