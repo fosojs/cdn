@@ -39,6 +39,10 @@ CdnServer.prototype.start = function() {
       ...this._plugins,
       {
         register: require('./app/plugins/registry'),
+        options: {
+          defaultRegistry: config.get('registry'),
+          registries: config.get('registries'),
+        },
       },
       {
         register: require('./app/plugins/file-max-age'),

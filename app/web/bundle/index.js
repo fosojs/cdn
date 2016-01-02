@@ -4,7 +4,6 @@ const parseBundleRoute = require('../../utils/parse-bundle-route');
 const Boom = require('boom');
 const uglify = require('uglify-js');
 const CleanCSS = require('clean-css');
-const config = require('../../../config');
 const R = require('ramda');
 const fullCssUrl = require('../../utils/full-css-url');
 

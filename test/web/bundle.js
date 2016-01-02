@@ -148,25 +148,35 @@ describe('bundle', function() {
     it(test.name, function(done) {
       let server = new Hapi.Server();
       server.connection();
-      server.register([{
-        register: registry,
-      }, {
-        register: fileMaxAge,
-        options: {
-          maxAge: test.maxAge,
+      server.register([
+        {
+          register: registry,
+          options: {
+            defaultRegistry: {
+              url: 'https://registry.npmjs.org/',
+            },
+          },
         },
-      }, {
-        register: bundleService,
-        options: {
-          overridePath: test.overridePath,
-          storagePath: path.resolve(__dirname, '../../.cdn-cache'),
+        {
+          register: fileMaxAge,
+          options: {
+            maxAge: test.maxAge,
+          },
         },
-      }, {
-        register: bundle,
-        options: {
-          resourcesHost: test.resourcesHost,
+        {
+          register: bundleService,
+          options: {
+            overridePath: test.overridePath,
+            storagePath: path.resolve(__dirname, '../../.cdn-cache'),
+          },
         },
-      }], function(err) {
+        {
+          register: bundle,
+          options: {
+            resourcesHost: test.resourcesHost,
+          },
+        },
+      ], function(err) {
         expect(err).to.not.exist;
 
         server.inject(test.path, function(res) {

@@ -15,23 +15,33 @@ describe('raw', function() {
   it('should return js file', function(done) {
     let server = new Hapi.Server();
     server.connection();
-    server.register([{
+    server.register([
+      {
         register: registry,
-      }, {
-      register: fileMaxAge,
-      options: {
-        maxAge: {
-          'default': '4h',
+        options: {
+          defaultRegistry: {
+            url: 'https://registry.npmjs.org/',
+          },
         },
       },
-    }, {
-      register: bundleService,
-      options: {
-        storagePath: path.resolve(__dirname, '../../.cdn-cache'),
+      {
+        register: fileMaxAge,
+        options: {
+          maxAge: {
+            'default': '4h',
+          },
+        },
       },
-    }, {
-      register: raw,
-    }], function(err) {
+      {
+        register: bundleService,
+        options: {
+          storagePath: path.resolve(__dirname, '../../.cdn-cache'),
+        },
+      },
+      {
+        register: raw,
+      },
+    ], function(err) {
       expect(err).to.not.exist;
 
       server.inject('/raw/applyq@0.2.1/index.js', function(res) {

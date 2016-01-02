@@ -3,10 +3,9 @@ ip: localhost
 storagePath: ./.cdn-cache
 registry:
   url: 'https://registry.npmjs.org/'
-accounts:
+registries:
   zkochan:
-    registry:
-      url: 'http://registry.npmjs.org/'
+    url: 'http://registry.npmjs.org/'
 maxAge:
   js: 4h
   css: 4h

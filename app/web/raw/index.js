@@ -1,7 +1,6 @@
 'use strict';
 
 const Boom = require('boom');
-const config = require('../../../config');
 const parseExt = require('../../utils/parse-ext');
 
 module.exports = function(server, opts, next) {

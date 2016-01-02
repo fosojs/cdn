@@ -1,9 +1,15 @@
 'use strict';
 
 const Boom = require('Boom');
-const config = require('../../../config');
 
 module.exports = function(plugin, opts, next) {
+  if (!opts.defaultRegistry)
+    return next(new Error('opts.defaultRegistry is required'));
+  if (!opts.defaultRegistry.url)
+    return next(new Error('opts.defaultRegistry.url is required'));
+
+  let registries = opts.registries || {};
+
   let registryCache = plugin.cache({
     expiresIn: opts.internalCacheExpiresIn,
     generateTimeout: 1000 * 20,
@@ -15,12 +21,14 @@ module.exports = function(plugin, opts, next) {
 
   let registryStore = plugin.plugins['registry-store'] || {
     getByName(name, cb) {
-      cb(null, config.get('accounts')[name].registry);
+      if (!registries[name])
+        return cb(new Error('registry called ' + name + ' not found'));
+      cb(null, registries[name]);
     },
   };
 
   function getByName(name, cb) {
-    if (!name) return cb(null, config.get('registry'));
+    if (!name) return cb(null, opts.defaultRegistry);
 
     registryStore.getByName(name, cb);
   }
