@@ -43,15 +43,15 @@ CdnServer.prototype.start = function() {
       {
         register: require('./app/plugins/file-max-age'),
         options: {
-          maxAge: config.get('maxAge')
-        }
+          maxAge: config.get('maxAge'),
+        },
       },
       {
         register: require('./app/plugins/bundle-service'),
         options: {
           overridePath: this._src,
           storagePath: path.resolve(__dirname, config.get('storagePath')),
-        }
+        },
       },
       {
         register: require('./app/web/bundle'),

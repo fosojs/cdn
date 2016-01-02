@@ -41,7 +41,7 @@ exports.register = function(server, opts, next) {
 
     let minify = code => uglify.minify(code, {fromString: true}).code;
     return params => R.merge(params, {
-      content: minify(params.content)
+      content: minify(params.content),
     });
   }
 
@@ -51,7 +51,7 @@ exports.register = function(server, opts, next) {
 
     let minify = code => new CleanCSS().minify(code).styles;
     let minifyTransformer = params => R.merge(params, {
-      content: minify(params.content)
+      content: minify(params.content),
     });
     return R.compose(minifyTransformer, fullCssUrl);
   }
@@ -70,7 +70,7 @@ exports.register = function(server, opts, next) {
         .get(id.paths, {
           extension: id.extension,
           transformer: getTransformer(id),
-          registry: id.registry
+          registry: id.registry,
         }, function(err, pkgFiles) {
           if (err) return next(null, null);
 
@@ -81,11 +81,11 @@ exports.register = function(server, opts, next) {
               R.min,
               Infinity,
               R.map(R.path(['maxAge']), pkgFiles)
-            )
+            ),
           });
         });
     },
-    generateTimeout: 1000 * 10 /* 10 seconds */
+    generateTimeout: 1000 * 10, /* 10 seconds */
   });
 
   function bundleHandler(req, reply) {
@@ -110,7 +110,7 @@ exports.register = function(server, opts, next) {
     config: {
       pre: [registry.pre],
     },
-    handler: bundleHandler
+    handler: bundleHandler,
   });
 
   server.route({
@@ -119,7 +119,7 @@ exports.register = function(server, opts, next) {
     config: {
       pre: [registry.pre],
     },
-    handler: bundleHandler
+    handler: bundleHandler,
   });
 
   next();

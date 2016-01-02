@@ -53,7 +53,7 @@ Package.prototype = {
   },
   get json() {
     return require(path.resolve(this.directory, 'package', 'package.json'));
-  }
+  },
 };
 
 Package.prototype.download = function(callback) {

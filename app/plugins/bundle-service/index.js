@@ -19,7 +19,7 @@ exports.register = function(plugin, opts, next) {
 
   const mainFields = {
     js: 'main',
-    css: 'style'
+    css: 'style',
   };
 
   let overrides = {};
@@ -27,7 +27,7 @@ exports.register = function(plugin, opts, next) {
     let overridePkg = require(path.join(opts.overridePath, 'package.json'));
     overrides[overridePkg.name] = {
       path: opts.overridePath,
-      pkg: overridePkg
+      pkg: overridePkg,
     };
   }
 
@@ -53,16 +53,16 @@ exports.register = function(plugin, opts, next) {
       let pkg = new LocalPackage(overrides[pkgMeta.name].path);
       return Promise.resolve({
         pkg,
-        isOverriden
+        isOverriden,
       });
     }
     let pkg = new Package(pkgMeta.name, matchingPkg.version, {
       registry: opts.registry,
-      storagePath
+      storagePath,
     });
     return Promise.resolve({
       pkg,
-      isOverriden
+      isOverriden,
     });
   }
 
@@ -76,7 +76,7 @@ exports.register = function(plugin, opts, next) {
   function fetchResources(opts) {
     let mpkg;
     let registry = new Registry({
-      registry: opts.registry
+      registry: opts.registry,
     });
     return getMatchingPkg(registry, opts.pkgMeta)
       .then(R.compose(
@@ -147,7 +147,7 @@ exports.register = function(plugin, opts, next) {
             version: matchingPkg.version,
             files,
             maxAge: isOverriden ?
-              0 : plugin.plugins['file-max-age'].getByExtension(opts.extension)
+              0 : plugin.plugins['file-max-age'].getByExtension(opts.extension),
           });
         });
       })
@@ -173,7 +173,7 @@ exports.register = function(plugin, opts, next) {
     .then(stream => cb(null, {
       stream,
       maxAge: isOverriden ?
-        0 : plugin.plugins['file-max-age'].getByPath(pkgMeta.file)
+        0 : plugin.plugins['file-max-age'].getByPath(pkgMeta.file),
     }))
     .catch(cb);
   });
@@ -183,5 +183,5 @@ exports.register = function(plugin, opts, next) {
 
 exports.register.attributes = {
   name: 'bundle-service',
-  dependencies: ['file-max-age']
+  dependencies: ['file-max-age'],
 };

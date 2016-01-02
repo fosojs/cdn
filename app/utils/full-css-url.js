@@ -18,7 +18,7 @@ function fullCssUrl(params) {
 
   let replaced = cssUrlRewrite(params.content, replace);
   return R.merge(params, {
-    content: replaced
+    content: replaced,
   });
 }
 

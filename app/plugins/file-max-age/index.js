@@ -30,5 +30,5 @@ module.exports = function(plugin, opts, next) {
 };
 
 module.exports.attributes = {
-  name: 'file-max-age'
+  name: 'file-max-age',
 };

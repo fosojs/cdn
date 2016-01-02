@@ -12,7 +12,7 @@ module.exports = function(server, opts, next) {
     let pkg = {
       name: metaParts[0],
       version: metaParts[1] || 'latest',
-      file: req.params.path || '_index.html'
+      file: req.params.path || '_index.html',
     };
 
     server.plugins['bundle-service'].getRaw(pkg, {
@@ -34,7 +34,7 @@ module.exports = function(server, opts, next) {
     config: {
       pre: [registry.pre],
     },
-    handler: rawHandler
+    handler: rawHandler,
   });
 
   server.route({
@@ -43,7 +43,7 @@ module.exports = function(server, opts, next) {
     config: {
       pre: [registry.pre],
     },
-    handler: rawHandler
+    handler: rawHandler,
   });
 
   next();
@@ -51,5 +51,5 @@ module.exports = function(server, opts, next) {
 
 module.exports.attributes = {
   name: 'web/raw',
-  dependencies: ['bundle-service', 'file-max-age', 'registry']
+  dependencies: ['bundle-service', 'file-max-age', 'registry'],
 };

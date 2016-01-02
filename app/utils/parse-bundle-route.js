@@ -27,7 +27,7 @@ function parseBundleRoute(route) {
   return {
     paths: parsePath(parts.path.replace(/\.min$/, ''), parts.ext),
     extension: parts.ext,
-    options: opts.slice(1, opts.length - 1)
+    options: opts.slice(1, opts.length - 1),
   };
 }
 

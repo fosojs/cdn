@@ -16,7 +16,7 @@ function parsePackageRoute(packageRoute, extension) {
     let parts = nv.split('@');
     return {
       name: prefix + parts[0],
-      version: parts[1] || '*'
+      version: parts[1] || '*',
     };
   }
 /*
@@ -29,7 +29,7 @@ function parsePackageRoute(packageRoute, extension) {
     return R.merge(parseNameVersion(parts[0]), {
       files: filesPart.split('+').map(function(filePath) {
         return filePath.endsWith(end) ? filePath : filePath + end;
-      })
+      }),
     });
   }
   return parseNameVersion(packageRoute);

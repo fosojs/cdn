@@ -16,7 +16,7 @@ module.exports = function(plugin, opts, next) {
   let registryStore = plugin.plugins['registry-store'] || {
     getByName(name, cb) {
       cb(null, config.get('accounts')[name].registry);
-    }
+    },
   };
 
   function getByName(name, cb) {

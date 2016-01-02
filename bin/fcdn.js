@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 'use strict';
+
 const program = require('commander');
 const pkg = require('../package.json');
 const updateNotifier = require('update-notifier');
@@ -8,9 +9,9 @@ const path = require('path');
 const Server = require('../').Server;
 
 updateNotifier({
-  pkg: pkg
+  pkg: pkg,
 }).notify({
-  defer: false
+  defer: false,
 });
 
 program.version(pkg.version);
@@ -21,7 +22,7 @@ program
   .action(function() {
     let cwd = path.resolve(process.cwd());
     let server = new Server({
-      src: cwd
+      src: cwd,
     });
     server.start();
   });

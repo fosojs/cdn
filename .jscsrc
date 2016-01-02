@@ -19,5 +19,9 @@
 
     "requirePaddingNewLinesAfterUseStrict": true,
 
-    "requireCurlyBraces": ["do"]
+    "requireCurlyBraces": ["do"],
+
+    "requireTrailingComma": {
+      "ignoreSingleLine": true
+    }
 }

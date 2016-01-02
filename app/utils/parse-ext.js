@@ -5,7 +5,7 @@ function parseExt(url) {
   let ext = parts.pop();
   return {
     path: parts.join('.'),
-    ext: ext
+    ext: ext,
   };
 }
 
