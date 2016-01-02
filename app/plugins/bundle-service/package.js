@@ -8,7 +8,6 @@ const findit = require('findit');
 const handlebars = require('handlebars');
 const fs = require('fs');
 const path = require('path');
-const config = require('../../../config');
 const normalize = require('normalize-path');
 const chalk = require('chalk');
 const debug = require('debug')('cdn');
@@ -25,13 +24,18 @@ function Package(name, version, opts) {
     throw new Error('opts.registry is required');
   }
   this._registry = opts.registry;
+
+  if (!opts.storagePath) {
+    throw new Error('opts.storagePath is required');
+  }
+  this._storagePath = opts.storagePath;
 }
 
 Package.prototype = {
   get directory() {
     let packageFolder = this.name.replace('/', '--');
     return normalize(
-      path.resolve(config.get('storagePath'), packageFolder, this.version)
+      path.resolve(this._storagePath, packageFolder, this.version)
     );
   },
   get tarballURL() {

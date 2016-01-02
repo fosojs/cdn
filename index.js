@@ -7,6 +7,7 @@ process.on('unhandledRejection', function(reason, p) {
 const config = require('./config');
 const Hapi = require('hapi');
 const chalk = require('chalk');
+const path = require('path');
 
 function CdnServer(opts) {
   opts = opts || {};
@@ -48,7 +49,8 @@ CdnServer.prototype.start = function() {
       {
         register: require('./app/plugins/bundle-service'),
         options: {
-          overridePath: this._src
+          overridePath: this._src,
+          storagePath: path.resolve(__dirname, config.get('storagePath')),
         }
       },
       {

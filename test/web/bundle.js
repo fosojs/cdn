@@ -159,6 +159,7 @@ describe('bundle', function() {
         register: bundleService,
         options: {
           overridePath: test.overridePath,
+          storagePath: path.resolve(__dirname, '../../.cdn-cache'),
         },
       }, {
         register: bundle,

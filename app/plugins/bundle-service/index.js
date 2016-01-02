@@ -11,6 +11,12 @@ const debug = require('debug')('cdn');
 const R = require('ramda');
 
 exports.register = function(plugin, opts, next) {
+  if (!opts.storagePath) {
+    return next(new Error('opts.storagePath is required'));
+  }
+
+  let storagePath = opts.storagePath;
+
   const mainFields = {
     js: 'main',
     css: 'style'
@@ -51,7 +57,8 @@ exports.register = function(plugin, opts, next) {
       });
     }
     let pkg = new Package(pkgMeta.name, matchingPkg.version, {
-      registry: opts.registry
+      registry: opts.registry,
+      storagePath
     });
     return Promise.resolve({
       pkg,

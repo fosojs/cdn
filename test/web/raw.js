@@ -9,6 +9,7 @@ const raw = require('../../app/web/raw');
 const compareToFile = require('./compare-to-file');
 const streamToString = require('stream-to-string');
 const registry = require('../../app/plugins/registry');
+const path = require('path');
 
 describe('raw', function() {
   it('should return js file', function(done) {
@@ -25,6 +26,9 @@ describe('raw', function() {
       },
     }, {
       register: bundleService,
+      options: {
+        storagePath: path.resolve(__dirname, '../../.cdn-cache'),
+      },
     }, {
       register: raw,
     }], function(err) {
