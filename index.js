@@ -14,7 +14,14 @@ function CdnServer(opts) {
   this._src = opts.src;
   this._port = opts.port || config.get('port');
   this._internalCacheExpiresIn = opts.internalCacheExpiresIn || 1;
-  this._plugins = opts.plugins;
+  this._plugins = opts.plugins || [
+    {
+      register: require('./app/plugins/registry-store'),
+      options: {
+        registries: config.get('registries'),
+      },
+    },
+  ];
 }
 
 CdnServer.prototype.start = function() {
@@ -41,7 +48,6 @@ CdnServer.prototype.start = function() {
         register: require('./app/plugins/registry'),
         options: {
           defaultRegistry: config.get('registry'),
-          registries: config.get('registries'),
         },
       },
       {
