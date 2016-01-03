@@ -66,12 +66,12 @@ exports.register = function(plugin, opts, next) {
     });
   }
 
-  let getMatchingPkg = function(registryClient, pkgMeta) {
+  function getMatchingPkg(registryClient, pkgMeta) {
     if (overrides[pkgMeta.name]) {
       return Promise.resolve(overrides[pkgMeta.name].pkg);
     }
     return registryClient.resolve(pkgMeta.name, pkgMeta.version);
-  };
+  }
 
   function fetchResources(opts) {
     let mpkg;
@@ -100,7 +100,7 @@ exports.register = function(plugin, opts, next) {
 
     let end = '.' + opts.extension;
 
-    async.series(packages.map((pkgMeta) => function(cb) {
+    async.series(packages.map(pkgMeta => function(cb) {
       function getMainFile(matchingPkg) {
         let mainField = mainFields[opts.extension];
         let mainFile = matchingPkg[mainField];

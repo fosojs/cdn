@@ -29,7 +29,7 @@ exports.register = function(server, opts, next) {
   }
 
   let bundleFiles = R.ifElse(
-    (type) => type === 'js',
+    type => type === 'js',
     bundleJavaScript,
     bundleCSS
   );

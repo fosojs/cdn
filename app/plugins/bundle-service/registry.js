@@ -26,6 +26,26 @@ Registry.prototype.resolve = function(module, version) {
   }.bind(this));
 };
 
+Registry.prototype._getMatchedVersions = function(version, data) {
+  try {
+    if (version === 'latest') {
+      return [data['dist-tags'].latest];
+    }
+
+    if (!semver.validRange(version)) {
+      console.log('not a valid range ' + version);
+
+      return Object.keys(data.versions).filter(v => v === version);
+    }
+
+    return Object.keys(data.versions)
+      .filter(v => semver.satisfies(v, version))
+      .sort((a, b) => semver.lte(a, b));
+  } catch (e) {
+    return null;
+  }
+};
+
 Registry.prototype._versions = function(module, version, cb) {
   regClient.get(this._registry.url + module.replace('/', '%2f'), {
     auth: {
@@ -34,23 +54,7 @@ Registry.prototype._versions = function(module, version, cb) {
   }, function(err, data) {
     if (err) return cb(err);
 
-    let v;
-
-    try {
-      if (version === 'latest') {
-        v = [data['dist-tags'].latest];
-      } else if (!semver.validRange(version)) {
-        console.log('not a valid range ' + version);
-
-        v = Object.keys(data.versions).filter(v => v === version);
-      } else {
-        v = Object.keys(data.versions)
-          .filter(v => semver.satisfies(v, version))
-          .sort((a, b) => semver.lte(a, b));
-      }
-    } catch (e) {
-      v = null;
-    }
+    let v = this._getMatchedVersions(version, data);
 
     if (!v || !v.length) {
       let e = new Error('No match for semver `' + version + '` found');
@@ -59,7 +63,7 @@ Registry.prototype._versions = function(module, version, cb) {
     }
 
     cb(null, data.versions[v[0]]);
-  });
+  }.bind(this));
 };
 
 module.exports = Registry;

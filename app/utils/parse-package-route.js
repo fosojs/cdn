@@ -2,23 +2,24 @@
 
 const R = require('ramda');
 
+function parseNameVersion(nv) {
+  let prefix;
+  if (nv[0] === '@') {
+    prefix = '@';
+    nv = nv.slice(1);
+  } else {
+    prefix = '';
+  }
+  let parts = nv.split('@');
+  return {
+    name: prefix + parts[0],
+    version: parts[1] || '*',
+  };
+}
+
 function parsePackageRoute(packageRoute, extension) {
   let end = '.' + extension;
 
-  function parseNameVersion(nv) {
-    let prefix;
-    if (nv[0] === '@') {
-      prefix = '@';
-      nv = nv.slice(1);
-    } else {
-      prefix = '';
-    }
-    let parts = nv.split('@');
-    return {
-      name: prefix + parts[0],
-      version: parts[1] || '*',
-    };
-  }
 /*
   if (packageRoute.startsWith('@')) {
     return packageRoute.substr(1);
