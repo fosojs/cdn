@@ -10,6 +10,7 @@ Inspired by [npm-cdn](https://github.com/zeke/npm-cdn),
 
 [![Dependency Status](https://david-dm.org/fosojs/cdn/status.svg?style=flat)](https://david-dm.org/fosojs/cdn)
 [![Build Status](https://travis-ci.org/fosojs/cdn.svg?branch=master)](https://travis-ci.org/fosojs/cdn)
+[![Coverage Status](https://coveralls.io/repos/fosojs/cdn/badge.svg?branch=master&service=github)](https://coveralls.io/github/fosojs/cdn?branch=master)
 [![npm version](https://badge.fury.io/js/foso-cdn.svg)](http://badge.fury.io/js/foso-cdn)
 
 
