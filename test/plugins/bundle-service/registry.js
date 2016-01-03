@@ -7,8 +7,8 @@ describe('Registry', function() {
   it('should resolve version', function(done) {
     let registry = new Registry({
       registry: {
-        url: 'http://registry.npmjs.org/'
-      }
+        url: 'http://registry.npmjs.org/',
+      },
     });
     registry.resolve('lodash', '0')
       .then(function(pkg) {
@@ -20,8 +20,8 @@ describe('Registry', function() {
   it('should throw error when version cannot be resolved', function(done) {
     let registry = new Registry({
       registry: {
-        url: 'http://registry.npmjs.org/'
-      }
+        url: 'http://registry.npmjs.org/',
+      },
     });
     registry.resolve('lodash', '0.99.99')
       .catch(function(err) {

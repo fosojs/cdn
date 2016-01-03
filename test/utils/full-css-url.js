@@ -10,8 +10,8 @@ describe('full css urls', function() {
       pkg: {
         name: 'foo',
         version: '1.0.0',
-        filePath: '/some/path/boo.css'
-      }
+        filePath: '/some/path/boo.css',
+      },
     });
 
     expect(result.content).to.eq('.a{background-image: url("/raw/foo@1.0.0/some/bar.png")}');
@@ -23,8 +23,8 @@ describe('full css urls', function() {
       pkg: {
         name: 'foo',
         version: '1.0.0',
-        filePath: 'some/path/boo.css'
-      }
+        filePath: 'some/path/boo.css',
+      },
     });
 
     expect(result.content).to.eq('.a{background-image: url("/raw/foo@1.0.0/some/bar.png")}');
@@ -36,8 +36,8 @@ describe('full css urls', function() {
       pkg: {
         name: 'foo',
         version: '1.0.0',
-        filePath: '/some/path/boo.css'
-      }
+        filePath: '/some/path/boo.css',
+      },
     });
 
     expect(result.content).to.eq('.a{background-image: url("/raw/foo@1.0.0/some/bar.png")}');
@@ -49,8 +49,8 @@ describe('full css urls', function() {
       pkg: {
         name: 'foo',
         version: '1.0.0',
-        filePath: '/some/path/boo.css'
-      }
+        filePath: '/some/path/boo.css',
+      },
     });
 
     expect(result.content).to.eq('.a{background-image: url("/raw/foo@1.0.0/some/bar.png")}');
@@ -62,8 +62,8 @@ describe('full css urls', function() {
       pkg: {
         name: 'foo',
         version: '1.0.0',
-        filePath: '/some/path/boo.css'
-      }
+        filePath: '/some/path/boo.css',
+      },
     });
 
     expect(result.content).to.eq('.a{background-image: url("/raw/foo@1.0.0/some/path/bar.png")}');
@@ -75,8 +75,8 @@ describe('full css urls', function() {
       pkg: {
         name: 'foo',
         version: '1.0.0',
-        filePath: '/some/path/boo.css'
-      }
+        filePath: '/some/path/boo.css',
+      },
     });
 
     expect(result.content).to.eq('.a{background-image: url("http://foo.com/bar.png")}');
@@ -88,8 +88,8 @@ describe('full css urls', function() {
       pkg: {
         name: 'foo',
         version: '1.0.0',
-        filePath: '/some/path/boo.css'
-      }
+        filePath: '/some/path/boo.css',
+      },
     });
 
     expect(result.content).to.eq('@import url("/raw/foo@1.0.0/some/bar.png");');

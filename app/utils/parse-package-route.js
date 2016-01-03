@@ -20,7 +20,7 @@ function parseNameVersion(nv) {
 function parsePackageRoute(packageRoute, extension) {
   let end = '.' + extension;
 
-/*
+  /*
   if (packageRoute.startsWith('@')) {
     return packageRoute.substr(1);
   }*/
