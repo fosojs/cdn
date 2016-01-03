@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node app",
-    "test": "gulp test",
+    "test": "gulp",
     "docs:clean": "rimraf _book",
     "docs:prepare": "gitbook install",
     "docs:build": "npm run docs:prepare && gitbook build",
@@ -76,6 +76,7 @@
     "gitbook-cli": "^1.0.1",
     "gulp": "^3.9.0",
     "gulp-clean": "^0.3.1",
+    "gulp-coveralls": "^0.1.4",
     "gulp-istanbul": "^0.10.3",
     "gulp-mocha": "^2.2.0",
     "gulp-plumber": "^1.0.1",
