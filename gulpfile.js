@@ -32,11 +32,7 @@ gulp.task('test', ['clean-cache', 'pre-test'], function(cb) {
     .on('end', () => cb(mochaErr));
 });
 
-gulp.task('coveralls', ['test'], function() {
-  if (!process.env.TRAVIS) return;
-
-  return gulp.src(path.join(__dirname, 'coverage/lcov.info'))
+gulp.task('coveralls', function() {
+  return gulp.src('coverage/**/lcov.info')
     .pipe(coveralls());
 });
-
-gulp.task('default', ['test', 'coveralls']);
