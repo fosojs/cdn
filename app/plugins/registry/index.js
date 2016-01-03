@@ -1,6 +1,6 @@
 'use strict';
 
-const Boom = require('Boom');
+const Boom = require('boom');
 
 module.exports = function(plugin, opts, next) {
   if (!opts.defaultRegistry)
