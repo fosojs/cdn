@@ -34,20 +34,32 @@ function applyq(obj, q, methods) {
 }
 
 module.exports = applyq;
-;cdn.packages["kamikaze"]={version:"0.1.0"};'use strict';
+;cdn.packages["kamikaze"]={version:"1.0.0"};'use strict';
 
-function kamikaze(cb, ttl) {
-  var killed = false;
+var once = require('once');
+
+function kamikaze(ttl, cb) {
+  if (typeof ttl !== 'number') {
+    throw new Error('ttl has to be a number');
+  }
+
+  if (typeof cb !== 'function') {
+    throw new Error('cb has to be a function');
+  }
+
+  var wcb = once(cb);
+
+  if (ttl === Infinity) {
+    return wcb;
+  }
+
   var timeoutId = setTimeout(function() {
-    cb(new Error('Method execution exceeded the time limit of `' + ttl + '`'));
-    killed = true;
+    wcb(new Error('Method execution exceeded the time limit of `' + ttl + '`'));
   }, ttl);
+
   return function() {
-    if (killed) {
-      return;
-    }
     clearTimeout(timeoutId);
-    return cb.apply(this, arguments);
+    return wcb.apply(this, arguments);
   };
 }
 
