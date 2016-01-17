@@ -18,6 +18,13 @@
     "type": "git",
     "url": "git+https://github.com/fosojs/cdn.git"
   },
+  "files": [
+    "app.js",
+    "index.js",
+    "app",
+    "bin",
+    "config"
+  ],
   "keywords": [
     "package",
     "manager",
