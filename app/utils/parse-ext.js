@@ -1,12 +1,11 @@
-'use strict';
-
+'use strict'
 function parseExt(url) {
-  let parts = url.split('.');
-  let ext = parts.pop();
+  let parts = url.split('.')
+  let ext = parts.pop()
   return {
     path: parts.join('.'),
     ext: ext,
-  };
+  }
 }
 
-module.exports = parseExt;
+module.exports = parseExt

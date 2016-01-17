@@ -1,19 +1,18 @@
-'use strict';
-
+'use strict'
 process.on('unhandledRejection', function(reason, p) {
-  console.log('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason);
-});
+  console.log('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason)
+})
 
-const config = require('./config');
-const Hapi = require('hapi');
-const chalk = require('chalk');
-const path = require('path');
+const config = require('./config')
+const Hapi = require('hapi')
+const chalk = require('chalk')
+const path = require('path')
 
 function CdnServer(opts) {
-  opts = opts || {};
-  this._src = opts.src;
-  this._port = opts.port || config.get('port');
-  this._internalCacheExpiresIn = opts.internalCacheExpiresIn || 1;
+  opts = opts || {}
+  this._src = opts.src
+  this._port = opts.port || config.get('port')
+  this._internalCacheExpiresIn = opts.internalCacheExpiresIn || 1
   this._plugins = opts.plugins || [
     {
       register: require('./app/plugins/registry-store'),
@@ -21,7 +20,7 @@ function CdnServer(opts) {
         registries: config.get('registries'),
       },
     },
-  ];
+  ]
 }
 
 CdnServer.prototype.start = function() {
@@ -39,8 +38,8 @@ CdnServer.prototype.start = function() {
           partition: 'cache'
         }
       ]*/
-    });
-    server.connection({ port: this._port });
+    })
+    server.connection({ port: this._port })
 
     server.register([
       ...this._plugins,
@@ -75,21 +74,21 @@ CdnServer.prototype.start = function() {
         register: require('./app/web/raw'),
       },
     ], function(err) {
-      if (err) reject(err);
+      if (err) reject(err)
 
       server.start(function() {
-        console.log('--------------------------------------');
-        console.log('');
-        console.log('  ' + chalk.blue('foso cdn') + ' server started');
-        console.log('  Hosted on ' + chalk.magenta(server.info.uri));
-        console.log('  Press Ctrl+C to stop the server');
-        console.log('');
-        console.log('--------------------------------------');
-      });
+        console.log('--------------------------------------')
+        console.log('')
+        console.log('  ' + chalk.blue('foso cdn') + ' server started')
+        console.log('  Hosted on ' + chalk.magenta(server.info.uri))
+        console.log('  Press Ctrl+C to stop the server')
+        console.log('')
+        console.log('--------------------------------------')
+      })
 
-      resolve();
-    });
-  });
-};
+      resolve()
+    })
+  })
+}
 
-exports.Server = CdnServer;
+exports.Server = CdnServer

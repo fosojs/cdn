@@ -1,15 +1,14 @@
-'use strict';
-
-const expect = require('chai').expect;
-const Hapi = require('hapi');
-const R = require('ramda');
-const bundleService = require('../../app/plugins/bundle-service');
-const fileMaxAge = require('../../app/plugins/file-max-age');
-const bundle = require('../../app/web/bundle');
-const registry = require('../../app/plugins/registry');
-const compareToFile = require('./compare-to-file');
-const path = require('path');
-const decamelize = require('decamelize');
+'use strict'
+const expect = require('chai').expect
+const Hapi = require('hapi')
+const R = require('ramda')
+const bundleService = require('../../app/plugins/bundle-service')
+const fileMaxAge = require('../../app/plugins/file-max-age')
+const bundle = require('../../app/web/bundle')
+const registry = require('../../app/plugins/registry')
+const compareToFile = require('./compare-to-file')
+const path = require('path')
+const decamelize = require('decamelize')
 
 let defaultParams = {
   maxAge: {
@@ -22,7 +21,7 @@ let defaultParams = {
       accessControlAllowOrigin: '*',
     },
   },
-};
+}
 
 let tests = [
   {
@@ -140,14 +139,14 @@ let tests = [
       },
     },
   },
-];
+]
 
 describe('bundle', function() {
   tests.forEach(function(opts) {
-    let test = R.merge(defaultParams, opts);
+    let test = R.merge(defaultParams, opts)
     it(test.name, function(done) {
-      let server = new Hapi.Server();
-      server.connection();
+      let server = new Hapi.Server()
+      server.connection()
       server.register([
         {
           register: registry,
@@ -177,18 +176,18 @@ describe('bundle', function() {
           },
         },
       ], function(err) {
-        expect(err).to.not.exist;
+        expect(err).to.not.exist
 
         server.inject(test.path, function(res) {
-          compareToFile(test.expected.fileName, res.payload);
+          compareToFile(test.expected.fileName, res.payload)
           Object.keys(test.expected.headers).forEach(function(headerKey) {
             expect(res.headers[decamelize(headerKey, '-')])
-              .to.eq(test.expected.headers[headerKey]);
-          });
+              .to.eq(test.expected.headers[headerKey])
+          })
 
-          done();
-        });
-      });
-    });
-  });
-});
+          done()
+        })
+      })
+    })
+  })
+})
