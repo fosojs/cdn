@@ -80,7 +80,7 @@ It is possible to minify the resources by adding `.min` to the end of their path
 
 ## License
 
-The MIT License (MIT)
+MIT © [Zoltan Kochan](https://www.kochan.io)
 
 [1]: http://cdn.foso.me/bundle/lodash@3.10.1(collection/pluck).js
 [2]: http://cdn.foso.me/bundle/lodash@3.10.1(array/fill+collection/pluck).js
