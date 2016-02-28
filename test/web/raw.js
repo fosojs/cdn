@@ -1,20 +1,29 @@
 'use strict'
+const describe = require('mocha').describe
+const it = require('mocha').it
 const expect = require('chai').expect
-const Hapi = require('hapi')
-const R = require('ramda')
+const express = require('express')
+const hexi = require('hexi')
 const bundleService = require('../../app/plugins/bundle-service')
 const fileMaxAge = require('../../app/plugins/file-max-age')
 const raw = require('../../app/web/raw')
 const compareToFile = require('./compare-to-file')
-const streamToString = require('stream-to-string')
 const registry = require('../../app/plugins/registry')
 const path = require('path')
+const plugiator = require('plugiator')
+const request = require('supertest')
 
-describe('raw', function() {
-  it('should return js file', function(done) {
-    let server = new Hapi.Server()
-    server.connection()
+describe('raw', function () {
+  it('should return js file', function (done) {
+    const server = hexi(express())
+
     server.register([
+      {
+        register: require('hexi-cache'),
+      },
+      {
+        register: plugiator.noop('registry-store'),
+      },
       {
         register: registry,
         options: {
@@ -40,17 +49,18 @@ describe('raw', function() {
       {
         register: raw,
       },
-    ], function(err) {
-      expect(err).to.not.exist
-
-      server.inject('/raw/applyq@0.2.1/index.js', function(res) {
-        compareToFile('raw-test1', res.payload)
-        expect(res.headers['content-type']).to.eq('application/javascript; charset=utf-8')
-        expect(res.headers['cache-control']).to.eq('max-age=14400')
-        expect(res.headers['access-control-allow-origin']).to.eq('*')
-
-        done()
-      })
+    ])
+    .then(() => {
+      request(server.express)
+        .get('/raw/applyq@0.2.1/index.js')
+        .expect('content-type', 'application/javascript')
+        .expect('cache-control', 'max-age=14400')
+        .expect('access-control-allow-origin', '*')
+        .end((err, res) => {
+          expect(err).to.not.exist
+          compareToFile('raw-test1', res.text)
+          done()
+        })
     })
   })
 })

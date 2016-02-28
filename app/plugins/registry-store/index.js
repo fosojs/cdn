@@ -1,15 +1,14 @@
 'use strict'
-module.exports = function(plugin, opts, next) {
-  let registries = opts.registries || {}
+module.exports = (plugin, opts) => {
+  const registries = opts.registries || {}
 
-  plugin.expose('getByName', function(name, cb) {
-    if (!registries[name])
+  plugin.expose('getByName', (name, cb) => {
+    if (!registries[name]) {
       return cb(new Error('registry called ' + name + ' not found'))
+    }
 
     cb(null, registries[name])
   })
-
-  next()
 }
 
 module.exports.attributes = {

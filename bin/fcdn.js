@@ -4,7 +4,7 @@ const program = require('commander')
 const pkg = require('../package.json')
 const updateNotifier = require('update-notifier')
 const path = require('path')
-const Server = require('../').Server
+const cdnServer = require('../')
 
 updateNotifier({ pkg }).notify({ defer: false })
 
@@ -13,9 +13,9 @@ program.version(pkg.version)
 program
   .command('serve')
   .description('Serves the current package.')
-  .action(function() {
-    let cwd = path.resolve(process.cwd())
-    let server = new Server({
+  .action(() => {
+    const cwd = path.resolve(process.cwd())
+    const server = cdnServer({
       src: cwd,
     })
     server.start()

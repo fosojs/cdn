@@ -1,6 +1,9 @@
 'use strict'
+const describe = require('mocha').describe
+const it = require('mocha').it
 const expect = require('chai').expect
-const Hapi = require('hapi')
+const express = require('express')
+const hexi = require('hexi')
 const R = require('ramda')
 const bundleService = require('../../app/plugins/bundle-service')
 const fileMaxAge = require('../../app/plugins/file-max-age')
@@ -9,8 +12,10 @@ const registry = require('../../app/plugins/registry')
 const compareToFile = require('./compare-to-file')
 const path = require('path')
 const decamelize = require('decamelize')
+const plugiator = require('plugiator')
+const supertest = require('supertest')
 
-let defaultParams = {
+const defaultParams = {
   maxAge: {
     'default': '4h',
   },
@@ -23,7 +28,7 @@ let defaultParams = {
   },
 }
 
-let tests = [
+const tests = [
   {
     name: 'should bundle one file',
     path: '/bundle/applyq@0.2.1(index).js',
@@ -141,53 +146,64 @@ let tests = [
   },
 ]
 
-describe('bundle', function() {
-  tests.forEach(function(opts) {
-    let test = R.merge(defaultParams, opts)
-    it(test.name, function(done) {
-      let server = new Hapi.Server()
-      server.connection()
-      server.register([
-        {
-          register: registry,
-          options: {
-            defaultRegistry: {
-              url: 'https://registry.npmjs.org/',
+describe('bundle', function () {
+  this.timeout(1e4)
+
+  tests.forEach(function (opts) {
+    const test = R.merge(defaultParams, opts)
+    it(test.name, function (done) {
+      const server = hexi(express())
+
+      return server
+        .register([
+          {
+            register: require('hexi-cache'),
+          },
+          {
+            register: plugiator.noop('registry-store'),
+          },
+          {
+            register: registry,
+            options: {
+              defaultRegistry: {
+                url: 'https://registry.npmjs.org/',
+              },
             },
           },
-        },
-        {
-          register: fileMaxAge,
-          options: {
-            maxAge: test.maxAge,
+          {
+            register: fileMaxAge,
+            options: {
+              maxAge: test.maxAge,
+            },
           },
-        },
-        {
-          register: bundleService,
-          options: {
-            overridePath: test.overridePath,
-            storagePath: path.resolve(__dirname, '../../.cdn-cache'),
+          {
+            register: bundleService,
+            options: {
+              overridePath: test.overridePath,
+              storagePath: path.resolve(__dirname, '../../.cdn-cache'),
+            },
           },
-        },
-        {
-          register: bundle,
-          options: {
-            resourcesHost: test.resourcesHost,
+          {
+            register: bundle,
+            options: {
+              resourcesHost: test.resourcesHost,
+            },
           },
-        },
-      ], function(err) {
-        expect(err).to.not.exist
+        ])
+        .then(() => {
+          const req = supertest(server.express).get(test.path)
 
-        server.inject(test.path, function(res) {
-          compareToFile(test.expected.fileName, res.payload)
-          Object.keys(test.expected.headers).forEach(function(headerKey) {
-            expect(res.headers[decamelize(headerKey, '-')])
-              .to.eq(test.expected.headers[headerKey])
+          Object.keys(test.expected.headers).forEach(function (headerKey) {
+            req.expect(
+              decamelize(headerKey, '-'), test.expected.headers[headerKey])
           })
 
-          done()
+          req.end(function (err, res) {
+            expect(err).to.not.exist
+            compareToFile(test.expected.fileName, res.text)
+            done()
+          })
         })
-      })
     })
   })
 })

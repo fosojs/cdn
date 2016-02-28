@@ -1,7 +1,7 @@
 'use strict'
-const Server = require('./').Server
+const cdnServer = require('./')
 
-let server = new Server({
+const server = cdnServer({
   internalCacheExpiresIn: 1000 * 60 * 5,
 })
 

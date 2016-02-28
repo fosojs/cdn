@@ -1,20 +1,21 @@
 'use strict'
 const Boom = require('boom')
+const plugiator = require('plugiator')
 
-module.exports = function(plugin, opts, next) {
+function register (plugin, opts) {
   if (!opts.defaultRegistry)
-    return next(new Error('opts.defaultRegistry is required'))
+    return new Error('opts.defaultRegistry is required')
   if (!opts.defaultRegistry.url)
-    return next(new Error('opts.defaultRegistry.url is required'))
+    return new Error('opts.defaultRegistry.url is required')
 
-  let registryCache = plugin.cache({
+  const registryCache = plugin.cache({
     expiresIn: opts.internalCacheExpiresIn,
     generateTimeout: 1000 * 20,
     segment: 'registrySegment',
-    generateFunc(id, next) {
+    generateFunc (id, next) {
       if (!id) return next(null, opts.defaultRegistry)
 
-      let registryStore = plugin.plugins['registry-store']
+      const registryStore = plugin.plugins.registryStore
       if (!registryStore)
         return next(new Error('registry-store not registered'))
 
@@ -25,23 +26,26 @@ module.exports = function(plugin, opts, next) {
     },
   })
 
-  plugin.expose('pre', {
-    method(req, reply) {
-      registryCache.get(req.params.account, function(err, registry) {
-        if (err) {
-          return reply(Boom.notFound('registry not found', err))
-        }
+  const registryMiddleware = (req, res, next) => {
+    registryCache.get(req.params.account, function (err, registry) {
+      if (err) {
+        return res.send(Boom.notFound('registry not found', err))
+      }
 
-        return reply(registry)
-      })
-    },
-    assign: 'registry',
+      req.registry = registry
+      next()
+    })
+  }
+
+  plugin.route.pre((next, opts) => {
+    if (!opts.config.registry) return next.applySame()
+
+    opts.pre.push(registryMiddleware)
+    return next(opts)
   })
-
-  next()
 }
 
-module.exports.attributes = {
+module.exports = plugiator.create({
   name: 'registry',
   dependencies: 'registry-store',
-}
+}, register)

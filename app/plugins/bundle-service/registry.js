@@ -1,13 +1,15 @@
 'use strict'
+module.exports = Registry
+
 const RegClient = require('npm-registry-client')
 const semver = require('semver')
 
-let regClient = new RegClient()
+const regClient = new RegClient()
 
 //
 // Find tarballs on npm
 //
-function Registry(opts) {
+function Registry (opts) {
   opts = opts || {}
 
   if (!opts.registry) {
@@ -16,16 +18,16 @@ function Registry(opts) {
   this._registry = opts.registry
 }
 
-Registry.prototype.resolve = function(module, version) {
+Registry.prototype.resolve = function (module, version) {
   return new Promise((resolve, reject) => {
-    this._versions(module, version, function(err, v) {
+    this._versions(module, version, function (err, v) {
       if (err) return reject(err)
       resolve(v)
     })
   })
 }
 
-Registry.prototype._getMatchedVersions = function(version, data) {
+Registry.prototype._getMatchedVersions = function (version, data) {
   try {
     if (version === 'latest') {
       return [data['dist-tags'].latest]
@@ -45,7 +47,7 @@ Registry.prototype._getMatchedVersions = function(version, data) {
   }
 }
 
-Registry.prototype._versions = function(module, version, cb) {
+Registry.prototype._versions = function (module, version, cb) {
   regClient.get(this._registry.url + module.replace('/', '%2f'), {
     auth: {
       token: this._registry.token,
@@ -53,10 +55,10 @@ Registry.prototype._versions = function(module, version, cb) {
   }, (err, data) => {
     if (err) return cb(err)
 
-    let v = this._getMatchedVersions(version, data)
+    const v = this._getMatchedVersions(version, data)
 
     if (!v || !v.length) {
-      let e = new Error('No match for semver `' + version + '` found')
+      const e = new Error('No match for semver `' + version + '` found')
       e.versions = Object.keys(data.versions)
       return cb(e)
     }
@@ -64,5 +66,3 @@ Registry.prototype._versions = function(module, version, cb) {
     cb(null, data.versions[v[0]])
   })
 }
-
-module.exports = Registry

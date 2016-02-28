@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const R = require('ramda')
 
-function normalizeNewline(str) {
+function normalizeNewline (str) {
   if (typeof str !== 'string') {
     throw new TypeError('Expected a string')
   }
@@ -12,14 +12,14 @@ function normalizeNewline(str) {
   return str.replace(/\r\n/g, '\n').replace(/\n*$/, '')
 }
 
-function readFile(fileName) {
-  let filePath = path.join(__dirname, './files', fileName + '.txt')
+function readFile (fileName) {
+  const filePath = path.join(__dirname, './files', fileName + '.txt')
   return fs.readFileSync(filePath, 'utf8')
 }
 
-function compareToFile(fileName, payload) {
-  let normalizedPayload = normalizeNewline(payload)
-  let expectedResult = R.compose(normalizeNewline, readFile)(fileName)
+function compareToFile (fileName, payload) {
+  const normalizedPayload = normalizeNewline(payload)
+  const expectedResult = R.compose(normalizeNewline, readFile)(fileName)
   expect(normalizedPayload.length).to.eq(expectedResult.length)
   expect(normalizedPayload).to.eq(expectedResult)
 }

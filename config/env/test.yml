@@ -3,6 +3,7 @@ ip: localhost
 storagePath: ./.cdn-cache
 registry:
   url: 'http://registry.npmjs.org/'
+registries:
 maxAge:
   js: 4h
   css: 4h

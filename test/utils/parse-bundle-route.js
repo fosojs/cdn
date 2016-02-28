@@ -1,10 +1,12 @@
 'use strict'
+const describe = require('mocha').describe
+const it = require('mocha').it
 const expect = require('chai').expect
 const parseBundleRoute = require('../../app/utils/parse-bundle-route')
 
-describe('parse package url', function() {
-  it('should parse one package with version', function() {
-    let bundle = parseBundleRoute('foo@4.2.1.js')
+describe('parse package url', function () {
+  it('should parse one package with version', function () {
+    const bundle = parseBundleRoute('foo@4.2.1.js')
     expect(bundle.extension).to.eq('js')
     expect(bundle.paths.length).to.eq(1)
     expect(bundle.paths[0].name).to.eq('foo')
@@ -12,8 +14,8 @@ describe('parse package url', function() {
     expect(bundle.paths[0].files).to.be.undefined
   })
 
-  it('should parse one package with no version', function() {
-    let bundle = parseBundleRoute('foo.js')
+  it('should parse one package with no version', function () {
+    const bundle = parseBundleRoute('foo.js')
     expect(bundle.extension).to.eq('js')
     expect(bundle.paths.length).to.eq(1)
     expect(bundle.paths[0].name).to.eq('foo')
@@ -21,8 +23,8 @@ describe('parse package url', function() {
     expect(bundle.paths[0].files).to.be.undefined
   })
 
-  it('should parse two bundle.paths', function() {
-    let bundle = parseBundleRoute('foo@3,bar@1.2.js')
+  it('should parse two bundle.paths', function () {
+    const bundle = parseBundleRoute('foo@3,bar@1.2.js')
     expect(bundle.extension).to.eq('js')
     expect(bundle.paths.length).to.eq(2)
     expect(bundle.paths[0].name).to.eq('foo')
@@ -33,8 +35,8 @@ describe('parse package url', function() {
     expect(bundle.paths[1].files).to.be.undefined
   })
 
-  it('should parse package with version and files', function() {
-    let bundle = parseBundleRoute('foo@3(bar+lib/index.js+lib/qar).js')
+  it('should parse package with version and files', function () {
+    const bundle = parseBundleRoute('foo@3(bar+lib/index.js+lib/qar).js')
     expect(bundle.extension).to.eq('js')
     expect(bundle.paths.length).to.eq(1)
     expect(bundle.paths[0].name).to.eq('foo')
@@ -45,8 +47,8 @@ describe('parse package url', function() {
     expect(bundle.paths[0].files[2]).to.eq('lib/qar.js')
   })
 
-  it('should parse one scoped package with version', function() {
-    let bundle = parseBundleRoute('@james/foo@4.2.1.js')
+  it('should parse one scoped package with version', function () {
+    const bundle = parseBundleRoute('@james/foo@4.2.1.js')
     expect(bundle.extension).to.eq('js')
     expect(bundle.paths.length).to.eq(1)
     expect(bundle.paths[0].name).to.eq('@james/foo')

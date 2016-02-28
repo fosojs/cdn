@@ -1,50 +1,38 @@
 'use strict'
 const Boom = require('boom')
-const parseExt = require('../../utils/parse-ext')
+const mime = require('mime')
 
-module.exports = function(server, opts, next) {
-  let registry = server.plugins.registry
-
-  function rawHandler(req, reply) {
-    let metaParts = req.params.pkgMeta.split('@')
-    let pkg = {
-      name: metaParts[0],
-      version: metaParts[1] || 'latest',
-      file: req.params.path || '_index.html',
-    }
-
-    server.plugins['bundle-service'].getRaw(pkg, {
-      registry: req.pre.registry,
-    }, function(err, result) {
-      if (err) {
-        return reply(Boom.notFound(err))
+module.exports = function (server, opts) {
+  server.route({
+    method: 'GET',
+    path: '/:account?/raw/:pkgMeta/*',
+    config: {
+      registry: true,
+    },
+    handler (req, res) {
+      const metaParts = req.params.pkgMeta.split('@')
+      const pkg = {
+        name: metaParts[0],
+        version: metaParts[1] || 'latest',
+        file: req.params[0] || '_index.html',
       }
-      reply(result.stream)
-        .type(server.mime.path(req.params.path).type)
-        .header('cache-control', 'max-age=' + result.maxAge)
-        .header('Access-Control-Allow-Origin', '*')
-    })
-  }
 
-  server.route({
-    method: 'GET',
-    path: '/raw/{pkgMeta}/{path*}',
-    config: {
-      pre: [registry.pre],
+      server.plugins.bundleService.getRaw(pkg, {
+        registry: req.registry,
+      }, function (err, result) {
+        if (err) return res.send(Boom.notFound(err))
+
+        res
+          .set('Content-Type', mime.lookup(req.params[0]))
+          .set('Cache-Control', 'max-age=' + result.maxAge)
+          .set('Access-Control-Allow-Origin', '*')
+
+        result.stream.on('data', data => res.write(data))
+        result.stream.on('end', () => res.end())
+        result.stream.on('error', err => console.error(err))
+      })
     },
-    handler: rawHandler,
   })
-
-  server.route({
-    method: 'GET',
-    path: '/{account}/raw/{pkgMeta}/{path*}',
-    config: {
-      pre: [registry.pre],
-    },
-    handler: rawHandler,
-  })
-
-  next()
 }
 
 module.exports.attributes = {

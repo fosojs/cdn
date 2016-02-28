@@ -1,9 +1,8 @@
 'use strict'
-const fs = require('fs')
 const yamlOrJSON = require('yaml-or-json')
 const convict = require('convict')
 
-let config = convict({
+const config = convict({
   env: {
     doc: 'The applicaton environment.',
     format: ['production', 'development', 'test'],
@@ -41,8 +40,8 @@ let config = convict({
   },
 })
 
-let env = config.get('env')
-let filePath = __dirname + '/env/' + env
+const env = config.get('env')
+const filePath = __dirname + '/env/' + env
 let configFile
 try {
   configFile = yamlOrJSON(filePath) || {}

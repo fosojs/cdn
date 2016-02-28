@@ -1,19 +1,23 @@
 'use strict'
-process.on('unhandledRejection', function(reason, p) {
-  console.log('Possibly Unhandled Rejection at: Promise ', p, ' reason: ', reason)
+module.exports = cdnServer
+
+process.on('unhandledRejection', function (reason, p) {
+  console.log('Possibly Unhandled Rejection at: Promise ', p, ' reason: ',
+    reason)
 })
 
 const config = require('./config')
-const Hapi = require('hapi')
+const express = require('express')
+const hexi = require('hexi')
 const chalk = require('chalk')
 const path = require('path')
 
-function CdnServer(opts) {
+function cdnServer (opts) {
   opts = opts || {}
-  this._src = opts.src
-  this._port = opts.port || config.get('port')
-  this._internalCacheExpiresIn = opts.internalCacheExpiresIn || 1
-  this._plugins = opts.plugins || [
+  const src = opts.src
+  const port = opts.port || config.get('port')
+  const internalCacheExpiresIn = opts.internalCacheExpiresIn || 1
+  const plugins = opts.plugins || [
     {
       register: require('./app/plugins/registry-store'),
       options: {
@@ -21,74 +25,60 @@ function CdnServer(opts) {
       },
     },
   ]
-}
 
-CdnServer.prototype.start = function() {
-  return new Promise((resolve, reject) => {
-    let server = new Hapi.Server({
-      debug: {
-        log: ['error'],
-        request: ['error'],
-      },
-      /*cache: [
+  return {
+    start () {
+      const app = express()
+      const server = hexi()
+      app.use(server.express)
+
+      return server.register([
+        ...plugins,
         {
-          name: 'redisCache',
-          engine: require('catbox-redis'),
-          host: '127.0.0.1',
-          partition: 'cache'
-        }
-      ]*/
-    })
-    server.connection({ port: this._port })
-
-    server.register([
-      ...this._plugins,
-      {
-        register: require('./app/plugins/registry'),
-        options: {
-          defaultRegistry: config.get('registry'),
+          register: require('hexi-cache'),
         },
-      },
-      {
-        register: require('./app/plugins/file-max-age'),
-        options: {
-          maxAge: config.get('maxAge'),
+        {
+          register: require('./app/plugins/registry'),
+          options: {
+            defaultRegistry: config.get('registry'),
+          },
         },
-      },
-      {
-        register: require('./app/plugins/bundle-service'),
-        options: {
-          overridePath: this._src,
-          storagePath: path.resolve(__dirname, config.get('storagePath')),
+        {
+          register: require('./app/plugins/file-max-age'),
+          options: {
+            maxAge: config.get('maxAge'),
+          },
         },
-      },
-      {
-        register: require('./app/web/bundle'),
-        options: {
-          resourcesHost: config.get('host') ||
-            config.get('ip') + ':' + this._port,
-          internalCacheExpiresIn: this._internalCacheExpiresIn,
+        {
+          register: require('./app/plugins/bundle-service'),
+          options: {
+            overridePath: src,
+            storagePath: path.resolve(__dirname, config.get('storagePath')),
+          },
         },
-      },
-      {
-        register: require('./app/web/raw'),
-      },
-    ], function(err) {
-      if (err) reject(err)
-
-      server.start(function() {
-        console.log('--------------------------------------')
-        console.log('')
-        console.log('  ' + chalk.blue('foso cdn') + ' server started')
-        console.log('  Hosted on ' + chalk.magenta(server.info.uri))
-        console.log('  Press Ctrl+C to stop the server')
-        console.log('')
-        console.log('--------------------------------------')
+        {
+          register: require('./app/web/bundle'),
+          options: {
+            resourcesHost: config.get('host') ||
+              config.get('ip') + ':' + port,
+            internalCacheExpiresIn: internalCacheExpiresIn,
+          },
+        },
+        {
+          register: require('./app/web/raw'),
+        },
+      ])
+      .then(() => {
+        app.listen(port, () => {
+          console.log('--------------------------------------')
+          console.log('')
+          console.log('  ' + chalk.blue('foso cdn') + ' server started')
+          console.log('  Hosted on port ' + chalk.magenta(port))
+          console.log('  Press Ctrl+C to stop the server')
+          console.log('')
+          console.log('--------------------------------------')
+        })
       })
-
-      resolve()
-    })
-  })
+    },
+  }
 }
-
-exports.Server = CdnServer

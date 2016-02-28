@@ -1,11 +1,11 @@
 'use strict'
-function parseExt(url) {
-  let parts = url.split('.')
-  let ext = parts.pop()
+module.exports = parseExt
+
+function parseExt (url) {
+  const parts = url.split('.')
+  const ext = parts.pop()
   return {
     path: parts.join('.'),
     ext: ext,
   }
 }
-
-module.exports = parseExt

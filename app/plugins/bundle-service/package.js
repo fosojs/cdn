@@ -1,4 +1,6 @@
 'use strict'
+module.exports = Package
+
 const RegClient = require('npm-registry-client')
 const fmt = require('util').format
 const tar = require('tar-fs')
@@ -12,9 +14,9 @@ const chalk = require('chalk')
 const debug = require('debug')('cdn')
 const streamToString = require('stream-to-string')
 
-let regClient = new RegClient()
+const regClient = new RegClient()
 
-function Package(name, version, opts) {
+function Package (name, version, opts) {
   this.name = name
   this.version = version
   this.opts = opts || {}
@@ -32,7 +34,7 @@ function Package(name, version, opts) {
 
 Package.prototype = {
   get directory() {
-    let packageFolder = this.name.replace('/', '--')
+    const packageFolder = this.name.replace('/', '--')
     return normalize(
       path.resolve(this._storagePath, packageFolder, this.version)
     )
@@ -55,7 +57,7 @@ Package.prototype = {
   },
 }
 
-Package.prototype.download = function(callback) {
+Package.prototype.download = function (callback) {
   if (this.isCached) return callback(null)
 
   debug('downloading tarball: ' + chalk.magenta(this.tarballURL))
@@ -79,8 +81,8 @@ Package.prototype.download = function(callback) {
   })
 }
 
-Package.prototype.buildFileTree = function(callback) {
-  let finder = findit(this.directory)
+Package.prototype.buildFileTree = function (callback) {
+  const finder = findit(this.directory)
   this.files = []
 
   debug('building file tree')
@@ -96,8 +98,8 @@ Package.prototype.buildFileTree = function(callback) {
   })
 }
 
-Package.prototype.writeIndexFiles = function(callback) {
-  let indexTemplate = handlebars.compile(
+Package.prototype.writeIndexFiles = function (callback) {
+  const indexTemplate = handlebars.compile(
     fs.readFileSync(path.resolve(__dirname, './index.template.hbs'), 'utf-8')
   )
 
@@ -120,9 +122,9 @@ Package.prototype.writeIndexFiles = function(callback) {
   callback(null)
 }
 
-Package.prototype.streamFile = function(filename) {
+Package.prototype.streamFile = function (filename) {
   return new Promise((resolve, reject) => {
-    let file = path.resolve(this.directory, 'package', filename)
+    const file = path.resolve(this.directory, 'package', filename)
 
     this.download(err => {
       if (err) {
@@ -149,8 +151,6 @@ Package.prototype.streamFile = function(filename) {
   })
 }
 
-Package.prototype.readFile = function(filename) {
+Package.prototype.readFile = function (filename) {
   return this.streamFile(filename).then(streamToString)
 }
-
-module.exports = Package
