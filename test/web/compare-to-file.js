@@ -2,7 +2,7 @@
 const expect = require('chai').expect
 const fs = require('fs')
 const path = require('path')
-const R = require('ramda')
+const compose = require('ramda').compose
 
 function normalizeNewline (str) {
   if (typeof str !== 'string') {
@@ -19,7 +19,7 @@ function readFile (fileName) {
 
 function compareToFile (fileName, payload) {
   const normalizedPayload = normalizeNewline(payload)
-  const expectedResult = R.compose(normalizeNewline, readFile)(fileName)
+  const expectedResult = compose(normalizeNewline, readFile)(fileName)
   expect(normalizedPayload.length).to.eq(expectedResult.length)
   expect(normalizedPayload).to.eq(expectedResult)
 }

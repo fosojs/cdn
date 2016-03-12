@@ -1,9 +1,9 @@
 'use strict'
 const path = require('path')
-const Package = require('./package')
-const LocalPackage = require('./local-package')
+const createPackage = require('./package')
+const localPackage = require('./local-package')
 const async = require('async')
-const Registry = require('./registry')
+const registry = require('./registry')
 const chalk = require('chalk')
 const debug = require('debug')('cdn')
 const R = require('ramda')
@@ -48,13 +48,13 @@ exports.register = function (plugin, opts) {
       debug('The requested package ' + chalk.blue(pkgMeta.name) +
         ' is overriden locally with ' +
         chalk.magenta(overrides[pkgMeta.name].path))
-      const pkg = new LocalPackage(overrides[pkgMeta.name].path)
+      const pkg = localPackage(overrides[pkgMeta.name].path)
       return Promise.resolve({
         pkg,
         isOverriden,
       })
     }
-    const pkg = new Package(pkgMeta.name, matchingPkg.version, {
+    const pkg = createPackage(pkgMeta.name, matchingPkg.version, {
       registry: opts.registry,
       storagePath,
     })
@@ -73,10 +73,10 @@ exports.register = function (plugin, opts) {
 
   function fetchResources (opts) {
     let mpkg
-    const registry = new Registry({
+    const reg = registry({
       registry: opts.registry,
     })
-    return getMatchingPkg(registry, opts.pkgMeta)
+    return getMatchingPkg(reg, opts.pkgMeta)
       .then(R.compose(
         matchingPkg => getPackageLoader(opts.pkgMeta, matchingPkg, opts),
         R.tap(value => mpkg = value))

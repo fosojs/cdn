@@ -1,8 +1,7 @@
 'use strict'
-module.exports = Package
+module.exports = pkg
 
 const RegClient = require('npm-registry-client')
-const fmt = require('util').format
 const tar = require('tar-fs')
 const zlib = require('zlib')
 const findit = require('findit')
@@ -16,141 +15,156 @@ const streamToString = require('stream-to-string')
 
 const regClient = new RegClient()
 
-function Package (name, version, opts) {
-  this.name = name
-  this.version = version
-  this.opts = opts || {}
+function pkg (name, version, opts) {
+  opts = opts || {}
 
   if (!opts.registry) {
     throw new Error('opts.registry is required')
   }
-  this._registry = opts.registry
+
+  const registry = opts.registry
 
   if (!opts.storagePath) {
     throw new Error('opts.storagePath is required')
   }
-  this._storagePath = opts.storagePath
-}
 
-Package.prototype = {
-  get directory() {
-    const packageFolder = this.name.replace('/', '--')
-    return normalize(
-      path.resolve(this._storagePath, packageFolder, this.version)
-    )
-  },
-  get tarballURL() {
-    let justPkgName
-    if (this.name[0] !== '@') {
-      justPkgName = this.name
-    } else {
-      justPkgName = this.name.split('/')[1]
-    }
-    return fmt('%s%s/-/%s-%s.tgz', this._registry.url, this.name, justPkgName,
-      this.version)
-  },
-  get isCached() {
-    return fs.existsSync(this.directory)
-  },
-  get json() {
-    return require(path.resolve(this.directory, 'package', 'package.json'))
-  },
-}
+  const storagePath = opts.storagePath
 
-Package.prototype.download = function (callback) {
-  if (this.isCached) return callback(null)
+  const directory = getDirectory()
 
-  debug('downloading tarball: ' + chalk.magenta(this.tarballURL))
+  const tarballURL = getTarballURL()
 
-  regClient.fetch(this.tarballURL, {
-    auth: {
-      token: this._registry.token,
-    },
-  }, (err, res) => {
-    if (err) return callback(err)
+  const isCached = fs.existsSync(directory)
 
-    res
-      .pipe(zlib.createGunzip())
-      .on('error', callback)
-      .pipe(tar.extract(this.directory))
-      .on('finish', () => {
-        debug('tarball downloaded: ' + chalk.magenta(this.tarballURL))
-        this.buildFileTree(callback)
-      })
-      .on('error', callback)
-  })
-}
+  function readJSON () {
+    return require(path.resolve(directory, 'package', 'package.json'))
+  }
 
-Package.prototype.buildFileTree = function (callback) {
-  const finder = findit(this.directory)
-  this.files = []
+  function download (callback) {
+    if (isCached) return callback(null)
 
-  debug('building file tree')
+    debug('downloading tarball: ' + chalk.magenta(tarballURL))
 
-  finder.on('file', (file, stat) => {
-    this.files.push(normalize(file)
-      .replace(this.directory + '/package/', ''))
-  })
+    regClient.fetch(tarballURL, {
+      auth: {
+        token: registry.token,
+      },
+    }, (err, res) => {
+      if (err) return callback(err)
 
-  finder.on('end', () => {
-    debug('built file tree')
-    this.writeIndexFiles(callback)
-  })
-}
-
-Package.prototype.writeIndexFiles = function (callback) {
-  const indexTemplate = handlebars.compile(
-    fs.readFileSync(path.resolve(__dirname, './index.template.hbs'), 'utf-8')
-  )
-
-  debug('writing _index.json')
-
-  fs.writeFileSync(
-    path.resolve(this.directory, 'package', '_index.json'),
-    JSON.stringify(this.files, null, 2)
-  )
-
-  debug('writing _index.html')
-
-  fs.writeFileSync(
-    path.resolve(this.directory, 'package', '_index.html'),
-    indexTemplate(this)
-  )
-
-  debug('wrote index files')
-
-  callback(null)
-}
-
-Package.prototype.streamFile = function (filename) {
-  return new Promise((resolve, reject) => {
-    const file = path.resolve(this.directory, 'package', filename)
-
-    this.download(err => {
-      if (err) {
-        return reject(err)
-      }
-
-      if (!fs.existsSync(file)) {
-        return reject(new Error('File not found: ' + file))
-      }
-
-      if (filename === 'package.json') {
-        return resolve(fs.createReadStream(file))
-      }
-
-      if (this.json.icon && this.json.icon === filename) {
-        return resolve(fs.createReadStream(file))
-      }
-
-      if (process.env.RESTRICTED_ACCESS) {
-        return reject(new Error('I only serve package.json files and package icons these days.'))
-      }
-      return resolve(fs.createReadStream(file))
+      res
+        .pipe(zlib.createGunzip())
+        .on('error', callback)
+        .pipe(tar.extract(directory))
+        .on('finish', () => {
+          debug('tarball downloaded: ' + chalk.magenta(tarballURL))
+          buildFileTree(callback)
+        })
+        .on('error', callback)
     })
-  })
-}
+  }
 
-Package.prototype.readFile = function (filename) {
-  return this.streamFile(filename).then(streamToString)
+  let files
+
+  function buildFileTree (callback) {
+    const finder = findit(directory)
+    files = []
+
+    debug('building file tree')
+
+    finder.on('file', (file, stat) => {
+      files.push(normalize(file)
+        .replace(directory + '/package/', ''))
+    })
+
+    finder.on('end', () => {
+      debug('built file tree')
+      writeIndexFiles(callback)
+    })
+  }
+
+  function writeIndexFiles (callback) {
+    const indexTemplate = handlebars.compile(
+      fs.readFileSync(path.resolve(__dirname, './index.template.hbs'), 'utf-8')
+    )
+
+    debug('writing _index.json')
+
+    fs.writeFileSync(
+      path.resolve(directory, 'package', '_index.json'),
+      JSON.stringify(files, null, 2)
+    )
+
+    debug('writing _index.html')
+
+    fs.writeFileSync(
+      path.resolve(directory, 'package', '_index.html'),
+      indexTemplate({
+        name,
+        version,
+        files,
+      })
+    )
+
+    debug('wrote index files')
+
+    callback(null)
+  }
+
+  function streamFile (filename) {
+    return new Promise((resolve, reject) => {
+      const file = path.resolve(directory, 'package', filename)
+
+      download(err => {
+        if (err) {
+          return reject(err)
+        }
+
+        if (!fs.existsSync(file)) {
+          return reject(new Error('File not found: ' + file))
+        }
+
+        if (filename === 'package.json') {
+          return resolve(fs.createReadStream(file))
+        }
+
+        const json = readJSON()
+
+        if (json.icon && json.icon === filename) {
+          return resolve(fs.createReadStream(file))
+        }
+
+        if (process.env.RESTRICTED_ACCESS) {
+          return reject(new Error('I only serve package.json files and package icons these days.'))
+        }
+        return resolve(fs.createReadStream(file))
+      })
+    })
+  }
+
+  function readFile (filename) {
+    return streamFile(filename).then(streamToString)
+  }
+
+  return {
+    streamFile,
+    readFile,
+  }
+
+  function getTarballURL () {
+    let justPkgName
+    if (name[0] !== '@') {
+      justPkgName = name
+    } else {
+      justPkgName = name.split('/')[1]
+    }
+    return `${registry.url}${name}/-/${justPkgName}-${version}.tgz`
+  }
+
+  function getDirectory () {
+    const packageFolder = name.replace('/', '--')
+    return normalize(
+      path.resolve(storagePath, packageFolder, version)
+    )
+  }
 }
