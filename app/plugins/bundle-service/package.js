@@ -51,10 +51,6 @@ function pkg (opts) {
 
   const isCached = fs.existsSync(directory)
 
-  function readJSON () {
-    return require(path.resolve(directory, 'package', 'package.json'))
-  }
-
   function download (callback) {
     if (isCached) return callback(null)
 
@@ -92,19 +88,6 @@ function pkg (opts) {
           return reject(new Error('File not found: ' + file))
         }
 
-        if (filename === 'package.json') {
-          return resolve(fs.createReadStream(file))
-        }
-
-        const json = readJSON()
-
-        if (json.icon && json.icon === filename) {
-          return resolve(fs.createReadStream(file))
-        }
-
-        if (process.env.RESTRICTED_ACCESS) {
-          return reject(new Error('I only serve package.json files and package icons these days.'))
-        }
         return resolve(fs.createReadStream(file))
       })
     })
