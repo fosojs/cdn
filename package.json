@@ -62,7 +62,6 @@
     "registry": "http://registry.npmjs.org"
   },
   "dependencies": {
-    "async": "^1.5.2",
     "boom": "^3.1.2",
     "chalk": "^1.1.1",
     "clean-css": "^3.4.9",
@@ -81,6 +80,7 @@
     "npm-registry-client": "^7.0.9",
     "plugiator": "^0.1.1",
     "ramda": "^0.19.1",
+    "rx": "^4.1.0",
     "semver": "^5.1.0",
     "stream-to-string": "^1.0.1",
     "tar-fs": "^1.10.0",

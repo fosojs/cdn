@@ -12,15 +12,21 @@ const regClient = new RegClient()
 function registry (opts) {
   opts = opts || {}
 
-  if (!opts.registry) {
-    throw new Error('opts.registry is required')
+  if (!opts.url) {
+    throw new Error('opts.url is required')
   }
 
   return { resolve }
 
-  function resolve (module, version) {
+  function resolve (opts) {
+    opts = opts || {}
+
+    if (!opts.name) {
+      throw new Error('opts.name is required')
+    }
+
     return new Promise((resolve, reject) => {
-      versions(module, version, (err, v) => {
+      versions(opts.name, opts.version, (err, v) => {
         if (err) return reject(err)
         resolve(v)
       })
@@ -48,9 +54,9 @@ function registry (opts) {
   }
 
   function versions (module, version, cb) {
-    regClient.get(opts.registry.url + module.replace('/', '%2f'), {
+    regClient.get(opts.url + module.replace('/', '%2f'), {
       auth: {
-        token: opts.registry.token,
+        token: opts.token,
       },
     }, (err, data) => {
       if (err) return cb(err)

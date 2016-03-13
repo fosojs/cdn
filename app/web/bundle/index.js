@@ -68,12 +68,11 @@ exports.register = function (server, opts) {
           extension: id.extension,
           transformer: getTransformer(id),
           registry: id.registry,
-        }, function (err, pkgFiles) {
-          if (err) return next(null, null)
-
+        })
+        .then((pkgFiles) => {
           const content = bundleFiles(id.extension, pkgFiles)
           next(null, {
-            content: content,
+            content,
             maxAge: R.reduce(
               R.min,
               Infinity,
@@ -81,6 +80,7 @@ exports.register = function (server, opts) {
             ),
           })
         })
+        .catch(err => next(null, null))
     },
     generateTimeout: 1000 * 10, // 10 seconds
   })

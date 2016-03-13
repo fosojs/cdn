@@ -1,90 +1,17 @@
 'use strict'
-const path = require('path')
-const createPackage = require('./package')
-const localPackage = require('./local-package')
-const async = require('async')
-const registry = require('./registry')
-const chalk = require('chalk')
-const debug = require('debug')('cdn')
 const R = require('ramda')
+const Rx = require('rx')
+const getMainFile = require('./get-main-file')
+const createPackageFetcher = require('./create-package-fetcher')
 
 exports.register = function (plugin, opts) {
   if (!opts.storagePath) {
     return new Error('opts.storagePath is required')
   }
 
-  const storagePath = opts.storagePath
+  const fetchPackage = createPackageFetcher(opts)
 
-  const mainFields = {
-    js: 'main',
-    css: 'style',
-  }
-
-  const overrides = {}
-  if (opts.overridePath) {
-    const overridePkg = require(path.join(opts.overridePath, 'package.json'))
-    overrides[overridePkg.name] = {
-      path: opts.overridePath,
-      pkg: overridePkg,
-    }
-  }
-
-  function getPackageLoader (pkgMeta, matchingPkg, opts) {
-    if (!matchingPkg) {
-      debug('No matching version found for ' +
-        chalk.blue(pkgMeta.name + '@' + pkgMeta.version))
-      return Promise.reject(
-        new Error('no matching version found for ' + pkgMeta.name + '@' +
-          pkgMeta.version)
-      )
-    }
-    if (matchingPkg.version !== pkgMeta.version) {
-      debug(chalk.blue(pkgMeta.name + '@' + pkgMeta.version) +
-        ' resolved to ' +
-        chalk.blue(pkgMeta.name + '@' + matchingPkg.version))
-    }
-    const isOverriden = !!overrides[pkgMeta.name]
-    if (isOverriden) {
-      debug('The requested package ' + chalk.blue(pkgMeta.name) +
-        ' is overriden locally with ' +
-        chalk.magenta(overrides[pkgMeta.name].path))
-      const pkg = localPackage(overrides[pkgMeta.name].path)
-      return Promise.resolve({
-        pkg,
-        isOverriden,
-      })
-    }
-    const pkg = createPackage(pkgMeta.name, matchingPkg.version, {
-      registry: opts.registry,
-      storagePath,
-    })
-    return Promise.resolve({
-      pkg,
-      isOverriden,
-    })
-  }
-
-  function getMatchingPkg (registryClient, pkgMeta) {
-    if (overrides[pkgMeta.name]) {
-      return Promise.resolve(overrides[pkgMeta.name].pkg)
-    }
-    return registryClient.resolve(pkgMeta.name, pkgMeta.version)
-  }
-
-  function fetchResources (opts) {
-    let mpkg
-    const reg = registry({
-      registry: opts.registry,
-    })
-    return getMatchingPkg(reg, opts.pkgMeta)
-      .then(R.compose(
-        matchingPkg => getPackageLoader(opts.pkgMeta, matchingPkg, opts),
-        R.tap(value => mpkg = value))
-      )
-      .then(res => Promise.resolve(R.merge(res, {matchingPkg: mpkg})))
-  }
-
-  plugin.expose('get', function (packages, opts, cb) {
+  plugin.expose('get', function (requestedPackages, opts) {
     opts = opts || {}
     if (!opts.registry) {
       throw new Error('opts.registry is required')
@@ -96,84 +23,75 @@ exports.register = function (plugin, opts) {
       throw new Error('opts.transformer is required')
     }
 
-    const end = '.' + opts.extension
+    return Rx.Observable.for(requestedPackages, Rx.Observable.just)
+      .flatMapWithMaxConcurrent(1, requestedPkg => {
+        function getFiles (matchingPkg) {
+          if (requestedPkg.files && requestedPkg.files.length)
+            return requestedPkg.files
 
-    async.series(packages.map(pkgMeta => function (cb) {
-      function getMainFile (matchingPkg) {
-        const mainField = mainFields[opts.extension]
-        const mainFile = matchingPkg[mainField]
-        debug('File not specified. Loading main file: ' +
-          chalk.magenta(mainFile))
-        if (mainFile.indexOf(end) !== -1)
-          return mainFile
+          return [
+            getMainFile({
+              packageJSON: matchingPkg,
+              extension: opts.extension,
+            }),
+          ]
+        }
 
-        return mainFile + end
-      }
-
-      function getFiles (matchingPkg) {
-        if (pkgMeta.files && pkgMeta.files.length)
-          return pkgMeta.files
-
-        return [getMainFile(matchingPkg)]
-      }
-
-      fetchResources({
-        pkgMeta,
-        registry: opts.registry,
-      }).then(function (params) {
-        const matchingPkg = params.matchingPkg
-        const isOverriden = params.isOverriden
-        const pkg = params.pkg
-        const files = getFiles(matchingPkg)
-        async.series(files.map(filePath => function (cb) {
-          pkg.readFile(filePath)
-            .then(content => cb(null, opts.transformer({
-              content,
-              pkg: {
-                name: matchingPkg.name,
-                version: matchingPkg.version,
-                filePath,
-              },
-            }).content))
-            .catch(cb)
-        }), function (err, files) {
-          if (err) {
-            return cb(err)
-          }
-          cb(null, {
-            name: matchingPkg.name,
-            version: matchingPkg.version,
-            files,
-            maxAge: isOverriden ?
-              0 : plugin.plugins.fileMaxAge.getByExtension(opts.extension),
-          })
+        return fetchPackage({
+          requestedPkg,
+          registry: opts.registry,
+        })
+        .flatMap(pkg => {
+          return Rx.Observable
+            .for(getFiles(pkg.json), Rx.Observable.just)
+            .flatMapWithMaxConcurrent(1, filePath =>
+              Rx.Observable.fromPromise(pkg.fs.readFile(filePath))
+                .map(content => ({
+                  content,
+                  pkg: {
+                    name: pkg.json.name,
+                    version: pkg.json.version,
+                    filePath,
+                  },
+                }))
+                .map(opts.transformer)
+                .pluck('content')
+            )
+            .reduce(R.concat, [])
+            .map(files => ({
+              name: pkg.json.name,
+              version: pkg.json.version,
+              files,
+              maxAge: pkg.isOverriden ?
+                0 : plugin.plugins.fileMaxAge.getByExtension(opts.extension),
+            }))
         })
       })
-      .catch(cb)
-    }), cb)
+      .reduce(R.concat, [])
+      .toPromise()
   })
 
-  plugin.expose('getRaw', function (pkgMeta, opts, cb) {
+  plugin.expose('getRaw', function (requestedPkg, opts) {
     opts = opts || {}
     if (!opts.registry) {
       throw new Error('opts.registry is required')
     }
 
-    let isOverriden
-    fetchResources({
-      pkgMeta,
+    const fetchPackage$ = fetchPackage({
+      requestedPkg,
       registry: opts.registry,
     })
-    .then(R.compose(
-      params => params.pkg.streamFile(pkgMeta.file),
-      R.tap(params => isOverriden = params.isOverriden)
-    ))
-    .then(stream => cb(null, {
-      stream,
-      maxAge: isOverriden ?
-        0 : plugin.plugins.fileMaxAge.getByPath(pkgMeta.file),
-    }))
-    .catch(cb)
+
+    return Rx.Observable.combineLatest(
+      fetchPackage$.pluck('isOverriden'),
+      fetchPackage$.flatMap(pkg => pkg.fs.streamFile(requestedPkg.file)),
+      (isOverriden, stream) => ({
+        stream,
+        maxAge: isOverriden ?
+          0 : plugin.plugins.fileMaxAge.getByPath(requestedPkg.file),
+      })
+    )
+    .toPromise()
   })
 }
 

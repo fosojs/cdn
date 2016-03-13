@@ -19,9 +19,8 @@ module.exports = function (server, opts) {
 
       server.plugins.bundleService.getRaw(pkg, {
         registry: req.registry,
-      }, function (err, result) {
-        if (err) return res.send(Boom.notFound(err))
-
+      })
+      .then((result) => {
         res
           .set('Content-Type', mime.lookup(req.params[0]))
           .set('Cache-Control', 'max-age=' + result.maxAge)
@@ -31,6 +30,7 @@ module.exports = function (server, opts) {
         result.stream.on('end', () => res.end())
         result.stream.on('error', err => console.error(err))
       })
+      .catch(err => res.send(Boom.notFound(err)))
     },
   })
 }

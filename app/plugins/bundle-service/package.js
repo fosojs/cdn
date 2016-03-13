@@ -4,19 +4,34 @@ module.exports = pkg
 const RegClient = require('npm-registry-client')
 const tar = require('tar-fs')
 const zlib = require('zlib')
-const findit = require('findit')
-const handlebars = require('handlebars')
 const fs = require('fs')
 const path = require('path')
 const normalize = require('normalize-path')
 const chalk = require('chalk')
 const debug = require('debug')('cdn')
 const streamToString = require('stream-to-string')
+const buildFileTree = require('./build-file-tree')
 
 const regClient = new RegClient()
 
-function pkg (name, version, opts) {
+function pkg (opts) {
   opts = opts || {}
+
+  if (!opts.pkg) {
+    throw new Error('opts.pkg is required')
+  }
+
+  if (!opts.pkg.name) {
+    throw new Error('opts.pkg.name is required')
+  }
+
+  const name = opts.pkg.name
+
+  if (!opts.pkg.version) {
+    throw new Error('opts.pkg.version is required')
+  }
+
+  const version = opts.pkg.version
 
   if (!opts.registry) {
     throw new Error('opts.registry is required')
@@ -58,57 +73,10 @@ function pkg (name, version, opts) {
         .pipe(tar.extract(directory))
         .on('finish', () => {
           debug('tarball downloaded: ' + chalk.magenta(tarballURL))
-          buildFileTree(callback)
+          buildFileTree({name, version, directory}, callback)
         })
         .on('error', callback)
     })
-  }
-
-  let files
-
-  function buildFileTree (callback) {
-    const finder = findit(directory)
-    files = []
-
-    debug('building file tree')
-
-    finder.on('file', (file, stat) => {
-      files.push(normalize(file)
-        .replace(directory + '/package/', ''))
-    })
-
-    finder.on('end', () => {
-      debug('built file tree')
-      writeIndexFiles(callback)
-    })
-  }
-
-  function writeIndexFiles (callback) {
-    const indexTemplate = handlebars.compile(
-      fs.readFileSync(path.resolve(__dirname, './index.template.hbs'), 'utf-8')
-    )
-
-    debug('writing _index.json')
-
-    fs.writeFileSync(
-      path.resolve(directory, 'package', '_index.json'),
-      JSON.stringify(files, null, 2)
-    )
-
-    debug('writing _index.html')
-
-    fs.writeFileSync(
-      path.resolve(directory, 'package', '_index.html'),
-      indexTemplate({
-        name,
-        version,
-        files,
-      })
-    )
-
-    debug('wrote index files')
-
-    callback(null)
   }
 
   function streamFile (filename) {
