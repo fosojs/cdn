@@ -11,6 +11,7 @@ const express = require('express')
 const hexi = require('hexi')
 const chalk = require('chalk')
 const path = require('path')
+const createBundleService = require('./app/plugins/bundle-service')
 
 function cdnServer (opts) {
   opts = opts || {}
@@ -32,6 +33,12 @@ function cdnServer (opts) {
       const server = hexi()
       app.use(server.express)
 
+      const bundleService = createBundleService({
+        maxAge: config.get('maxAge'),
+        overridePath: src,
+        storagePath: path.resolve(__dirname, config.get('storagePath')),
+      })
+
       return server.register([
         ...plugins,
         {
@@ -44,21 +51,9 @@ function cdnServer (opts) {
           },
         },
         {
-          register: require('./app/plugins/file-max-age'),
-          options: {
-            maxAge: config.get('maxAge'),
-          },
-        },
-        {
-          register: require('./app/plugins/bundle-service'),
-          options: {
-            overridePath: src,
-            storagePath: path.resolve(__dirname, config.get('storagePath')),
-          },
-        },
-        {
           register: require('./app/web/bundle'),
           options: {
+            bundleService,
             resourcesHost: config.get('host') ||
               config.get('ip') + ':' + port,
             internalCacheExpiresIn: internalCacheExpiresIn,
@@ -66,6 +61,9 @@ function cdnServer (opts) {
         },
         {
           register: require('./app/web/raw'),
+          options: {
+            bundleService,
+          },
         },
       ])
       .then(() => {

@@ -5,8 +5,7 @@ const expect = require('chai').expect
 const express = require('express')
 const hexi = require('hexi')
 const R = require('ramda')
-const bundleService = require('../../app/plugins/bundle-service')
-const fileMaxAge = require('../../app/plugins/file-max-age')
+const createBundleService = require('../../app/plugins/bundle-service')
 const bundle = require('../../app/web/bundle')
 const registry = require('../../app/plugins/registry')
 const compareToFile = require('./compare-to-file')
@@ -154,6 +153,12 @@ describe('bundle', function () {
     it(test.name, function (done) {
       const server = hexi(express())
 
+      const bundleService = createBundleService({
+        maxAge: test.maxAge,
+        overridePath: test.overridePath,
+        storagePath: path.resolve(__dirname, '../../.cdn-cache'),
+      })
+
       return server
         .register([
           {
@@ -171,22 +176,10 @@ describe('bundle', function () {
             },
           },
           {
-            register: fileMaxAge,
-            options: {
-              maxAge: test.maxAge,
-            },
-          },
-          {
-            register: bundleService,
-            options: {
-              overridePath: test.overridePath,
-              storagePath: path.resolve(__dirname, '../../.cdn-cache'),
-            },
-          },
-          {
             register: bundle,
             options: {
               resourcesHost: test.resourcesHost,
+              bundleService,
             },
           },
         ])

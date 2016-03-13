@@ -1,17 +1,26 @@
 'use strict'
+module.exports = bundleService
+
 const R = require('ramda')
 const Rx = require('rx')
 const getMainFile = require('./get-main-file')
 const createPackageFetcher = require('./create-package-fetcher')
+const fileMaxAge = require('../file-max-age')
 
-exports.register = function (plugin, opts) {
+function bundleService (opts) {
   if (!opts.storagePath) {
     return new Error('opts.storagePath is required')
   }
 
+  const maxAge = fileMaxAge({
+    maxAge: opts.maxAge,
+  })
+
   const fetchPackage = createPackageFetcher(opts)
 
-  plugin.expose('get', function (requestedPackages, opts) {
+  return { get: get, getRaw }
+
+  function get (requestedPackages, opts) {
     opts = opts || {}
     if (!opts.registry) {
       throw new Error('opts.registry is required')
@@ -63,15 +72,15 @@ exports.register = function (plugin, opts) {
               version: pkg.json.version,
               files,
               maxAge: pkg.isOverriden ?
-                0 : plugin.plugins.fileMaxAge.getByExtension(opts.extension),
+                0 : maxAge.getByExtension(opts.extension),
             }))
         })
       })
       .reduce(R.concat, [])
       .toPromise()
-  })
+  }
 
-  plugin.expose('getRaw', function (requestedPkg, opts) {
+  function getRaw (requestedPkg, opts) {
     opts = opts || {}
     if (!opts.registry) {
       throw new Error('opts.registry is required')
@@ -88,14 +97,9 @@ exports.register = function (plugin, opts) {
       (isOverriden, stream) => ({
         stream,
         maxAge: isOverriden ?
-          0 : plugin.plugins.fileMaxAge.getByPath(requestedPkg.file),
+          0 : maxAge.getByPath(requestedPkg.file),
       })
     )
     .toPromise()
-  })
-}
-
-exports.register.attributes = {
-  name: 'bundle-service',
-  dependencies: ['file-max-age'],
+  }
 }

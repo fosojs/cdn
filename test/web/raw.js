@@ -4,8 +4,7 @@ const it = require('mocha').it
 const expect = require('chai').expect
 const express = require('express')
 const hexi = require('hexi')
-const bundleService = require('../../app/plugins/bundle-service')
-const fileMaxAge = require('../../app/plugins/file-max-age')
+const createBundleService = require('../../app/plugins/bundle-service')
 const raw = require('../../app/web/raw')
 const compareToFile = require('./compare-to-file')
 const registry = require('../../app/plugins/registry')
@@ -16,6 +15,13 @@ const request = require('supertest')
 describe('raw', function () {
   it('should return js file', function (done) {
     const server = hexi(express())
+
+    const bundleService = createBundleService({
+      maxAge: {
+        'default': '4h',
+      },
+      storagePath: path.resolve(__dirname, '../../.cdn-cache'),
+    })
 
     server.register([
       {
@@ -33,21 +39,10 @@ describe('raw', function () {
         },
       },
       {
-        register: fileMaxAge,
-        options: {
-          maxAge: {
-            'default': '4h',
-          },
-        },
-      },
-      {
-        register: bundleService,
-        options: {
-          storagePath: path.resolve(__dirname, '../../.cdn-cache'),
-        },
-      },
-      {
         register: raw,
+        options: {
+          bundleService,
+        },
       },
     ])
     .then(() => {

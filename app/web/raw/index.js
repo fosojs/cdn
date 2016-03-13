@@ -3,6 +3,10 @@ const Boom = require('boom')
 const mime = require('mime')
 
 module.exports = function (server, opts) {
+  if (!opts.bundleService) {
+    return new Error('opts.bundleService is required')
+  }
+
   server.route({
     method: 'GET',
     path: '/:account?/raw/:pkgMeta/*',
@@ -17,7 +21,7 @@ module.exports = function (server, opts) {
         file: req.params[0] || '_index.html',
       }
 
-      server.plugins.bundleService.getRaw(pkg, {
+      opts.bundleService.getRaw(pkg, {
         registry: req.registry,
       })
       .then((result) => {
@@ -37,5 +41,5 @@ module.exports = function (server, opts) {
 
 module.exports.attributes = {
   name: 'web/raw',
-  dependencies: ['bundle-service', 'file-max-age', 'registry'],
+  dependencies: ['registry'],
 }

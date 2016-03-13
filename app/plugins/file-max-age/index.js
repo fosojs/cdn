@@ -1,8 +1,12 @@
 'use strict'
+module.exports = fileMaxAge
+
 const parseExtension = require('../../utils/parse-ext')
 const Duration = require('duration-js')
 
-module.exports = function (plugin, opts) {
+function fileMaxAge (opts) {
+  opts = opts || {}
+
   if (!opts.maxAge) {
     throw new Error('opts.maxAge is required')
   }
@@ -20,10 +24,8 @@ module.exports = function (plugin, opts) {
     return d.seconds()
   }
 
-  plugin.expose('getByExtension', getByExtension)
-  plugin.expose('getByPath', path => getByExtension(parseExtension(path).ext))
-}
-
-module.exports.attributes = {
-  name: 'file-max-age',
+  return {
+    getByExtension,
+    getByPath: path => getByExtension(parseExtension(path).ext),
+  }
 }

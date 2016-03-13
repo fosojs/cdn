@@ -8,6 +8,10 @@ const fullCssUrl = require('../../utils/full-css-url')
 const mime = require('mime')
 
 exports.register = function (server, opts) {
+  if (!opts.bundleService) {
+    return new Error('opts.bundleService is required')
+  }
+
   if (!opts.resourcesHost) {
     return new Error('opts.resourcesHost is required')
   }
@@ -63,7 +67,7 @@ exports.register = function (server, opts) {
     //cache: 'redisCache',
     expiresIn: opts.internalCacheExpiresIn,
     generateFunc (id, next) {
-      server.plugins.bundleService
+      opts.bundleService
         .get(id.paths, {
           extension: id.extension,
           transformer: getTransformer(id),
@@ -112,5 +116,5 @@ exports.register = function (server, opts) {
 
 exports.register.attributes = {
   name: 'app/bundle',
-  dependencies: ['bundle-service', 'registry'],
+  dependencies: ['registry'],
 }
