@@ -47,69 +47,69 @@ function pkg (opts) {
 
   const directory = getDirectory()
 
-  const tarballURL = getTarballURL()
-
-  const isCached = fs.existsSync(directory)
-
-  function download (callback) {
-    if (isCached) return callback(null)
-
-    debug('downloading tarball: ' + chalk.magenta(tarballURL))
-
-    regClient.fetch(tarballURL, {
-      auth: {
-        token: registry.token,
-      },
-    }, (err, res) => {
-      if (err) return callback(err)
-
-      res
-        .pipe(zlib.createGunzip())
-        .on('error', callback)
-        .pipe(tar.extract(directory))
-        .on('finish', () => {
-          debug('tarball downloaded: ' + chalk.magenta(tarballURL))
-          buildFileTree({name, version, directory}, callback)
-        })
-        .on('error', callback)
-    })
-  }
-
-  function streamFile (filename) {
-    return new Promise((resolve, reject) => {
-      const file = path.resolve(directory, 'package', filename)
-
-      download(err => {
-        if (err) {
-          return reject(err)
-        }
-
-        if (!fs.existsSync(file)) {
-          return reject(new Error('File not found: ' + file))
-        }
-
-        return resolve(fs.createReadStream(file))
-      })
-    })
-  }
-
-  function readFile (filename) {
-    return streamFile(filename).then(streamToString)
-  }
+  let isCached = fs.existsSync(directory)
 
   return {
     streamFile,
     readFile,
   }
 
+  function streamFile (filename) {
+    const file = path.resolve(directory, 'package', filename)
+
+    return download()
+      .then(() => {
+        if (!fs.existsSync(file)) {
+          return Promise.reject(new Error('File not found: ' + file))
+        }
+
+        return Promise.resolve(fs.createReadStream(file))
+      })
+  }
+
+  function readFile (filename) {
+    return streamFile(filename).then(streamToString)
+  }
+
+  function download () {
+    return new Promise((resolve, reject) => {
+      if (isCached) return resolve()
+
+      const tarballURL = getTarballURL()
+
+      debug('downloading tarball: ' + chalk.magenta(tarballURL))
+
+      regClient.fetch(tarballURL, {
+        auth: {
+          token: registry.token,
+        },
+      }, (err, res) => {
+        if (err) return reject(err)
+
+        res
+          .pipe(zlib.createGunzip())
+          .on('error', reject)
+          .pipe(tar.extract(directory))
+          .on('finish', () => {
+            isCached = true
+            debug('tarball downloaded: ' + chalk.magenta(tarballURL))
+            buildFileTree({name, version, directory}, resolve)
+          })
+          .on('error', reject)
+      })
+    })
+  }
+
   function getTarballURL () {
-    let justPkgName
-    if (name[0] !== '@') {
-      justPkgName = name
-    } else {
-      justPkgName = name.split('/')[1]
-    }
+    const justPkgName = getScopelessName(name)
     return `${registry.url}${name}/-/${justPkgName}-${version}.tgz`
+  }
+
+  function getScopelessName (name) {
+    if (name[0] !== '@') {
+      return name
+    }
+    return name.split('/')[1]
   }
 
   function getDirectory () {
