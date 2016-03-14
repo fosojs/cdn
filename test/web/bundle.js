@@ -24,10 +24,33 @@ const defaultParams = {
       cacheControl: 'max-age=14400',
       accessControlAllowOrigin: '*',
     },
+    status: 200,
   },
 }
 
 const tests = [
+  {
+    name: 'should return error when the only file not found',
+    path: '/bundle/applyq@0.2.122222(index).js',
+    expected: {
+      status: 404,
+      fileContent: 'Not found.',
+      headers: {
+        contentType: 'text/plain; charset=utf-8',
+      },
+    },
+  },
+  {
+    name: 'should return error when one of the files not found',
+    path: '/bundle/applyq@0.2.1(index+not_exists).js',
+    expected: {
+      status: 404,
+      fileContent: 'Not found.',
+      headers: {
+        contentType: 'text/plain; charset=utf-8',
+      },
+    },
+  },
   {
     name: 'should bundle one file',
     path: '/bundle/applyq@0.2.1(index).js',
@@ -150,6 +173,8 @@ describe('bundle', function () {
 
   tests.forEach(function (opts) {
     const test = R.merge(defaultParams, opts)
+    test.expected = R.merge(defaultParams.expected, opts.expected)
+
     it(test.name, function (done) {
       const server = hexi(express())
 
@@ -184,7 +209,10 @@ describe('bundle', function () {
           },
         ])
         .then(() => {
-          const req = supertest(server.express).get(test.path)
+          const req = supertest(server.express)
+            .get(test.path)
+
+          req.expect(test.expected.status)
 
           Object.keys(test.expected.headers).forEach(function (headerKey) {
             req.expect(
@@ -193,7 +221,11 @@ describe('bundle', function () {
 
           req.end(function (err, res) {
             expect(err).to.not.exist
-            compareToFile(test.expected.fileName, res.text)
+            if (test.expected.fileName) {
+              compareToFile(test.expected.fileName, res.text)
+            } else {
+              expect(test.expected.fileContent).eq(res.text)
+            }
             done()
           })
         })

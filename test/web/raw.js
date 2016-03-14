@@ -58,4 +58,49 @@ describe('raw', function () {
         })
     })
   })
+
+  it('should return error when no file found', function (done) {
+    const server = hexi(express())
+
+    const bundleService = createBundleService({
+      maxAge: {
+        'default': '4h',
+      },
+      storagePath: path.resolve(__dirname, '../../.cdn-cache'),
+    })
+
+    return server.register([
+      {
+        register: require('hexi-cache'),
+      },
+      {
+        register: plugiator.noop('registry-store'),
+      },
+      {
+        register: registry,
+        options: {
+          defaultRegistry: {
+            url: 'https://registry.npmjs.org/',
+          },
+        },
+      },
+      {
+        register: raw,
+        options: {
+          bundleService,
+        },
+      },
+    ])
+    .then(() => {
+      request(server.express)
+        .get('/raw/applyqqq@0.2.1/index.js')
+        .expect('content-type', 'text/plain; charset=utf-8')
+        .expect(404)
+        .end((err, res) => {
+          expect(err).to.not.exist
+          expect(res.text).to.eq('Not found: file "index.js" in package applyqqq@0.2.1')
+          done()
+        })
+    })
+  })
 })
