@@ -1,5 +1,5 @@
 'use strict'
-module.exports = pkg
+module.exports = downloadPkg
 
 const RegClient = require('npm-registry-client')
 const tar = require('tar-fs')
@@ -9,12 +9,12 @@ const path = require('path')
 const normalize = require('normalize-path')
 const chalk = require('chalk')
 const debug = require('debug')('cdn')
-const streamToString = require('stream-to-string')
 const buildFileTree = require('./build-file-tree')
+const localPackageReader = require('./local-package')
 
 const regClient = new RegClient()
 
-function pkg (opts) {
+function downloadPkg (opts) {
   opts = opts || {}
 
   if (!opts.pkg) {
@@ -47,57 +47,40 @@ function pkg (opts) {
 
   const directory = getDirectory()
 
-  let isCached = fs.existsSync(directory)
+  const isCached = fs.existsSync(directory)
 
-  return {
-    streamFile,
-    readFile,
+  if (isCached) {
+    return Promise.resolve(createPkgReader())
   }
 
-  function streamFile (filename) {
-    const file = path.resolve(directory, 'package', filename)
+  return new Promise((resolve, reject) => {
+    const tarballURL = getTarballURL()
 
-    return download()
-      .then(() => {
-        if (!fs.existsSync(file)) {
-          return Promise.reject(new Error('File not found: ' + file))
-        }
+    debug('downloading tarball: ' + chalk.magenta(tarballURL))
 
-        return Promise.resolve(fs.createReadStream(file))
-      })
-  }
+    regClient.fetch(tarballURL, {
+      auth: {
+        token: registry.token,
+      },
+    }, (err, res) => {
+      if (err) return reject(err)
 
-  function readFile (filename) {
-    return streamFile(filename).then(streamToString)
-  }
-
-  function download () {
-    return new Promise((resolve, reject) => {
-      if (isCached) return resolve()
-
-      const tarballURL = getTarballURL()
-
-      debug('downloading tarball: ' + chalk.magenta(tarballURL))
-
-      regClient.fetch(tarballURL, {
-        auth: {
-          token: registry.token,
-        },
-      }, (err, res) => {
-        if (err) return reject(err)
-
-        res
-          .pipe(zlib.createGunzip())
-          .on('error', reject)
-          .pipe(tar.extract(directory))
-          .on('finish', () => {
-            isCached = true
-            debug('tarball downloaded: ' + chalk.magenta(tarballURL))
-            buildFileTree({name, version, directory}, resolve)
+      res
+        .pipe(zlib.createGunzip())
+        .on('error', reject)
+        .pipe(tar.extract(directory))
+        .on('finish', () => {
+          debug('tarball downloaded: ' + chalk.magenta(tarballURL))
+          buildFileTree({name, version, directory}, () => {
+            resolve(createPkgReader())
           })
-          .on('error', reject)
-      })
+        })
+        .on('error', reject)
     })
+  })
+
+  function createPkgReader () {
+    return localPackageReader(path.resolve(directory, 'package'))
   }
 
   function getTarballURL () {

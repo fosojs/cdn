@@ -2,8 +2,8 @@
 module.exports = creaetPackageFetcher
 
 const path = require('path')
-const createPackageReader = require('./package')
 const createLocalPackageReader = require('./local-package')
+const downloadPkg = require('./download-pkg')
 const createRegistry = require('./registry')
 const chalk = require('chalk')
 const debug = require('debug')('cdn')
@@ -43,7 +43,7 @@ function creaetPackageFetcher (opts) {
     const registry = createRegistry(opts.registry)
 
     return Rx.Observable.fromPromise(registry.resolve(opts.requestedPkg))
-      .map(matchingPkgJSON =>
+      .flatMap(matchingPkgJSON =>
         getPackageLoader(opts.requestedPkg, matchingPkgJSON, opts))
   }
 
@@ -51,8 +51,8 @@ function creaetPackageFetcher (opts) {
     if (!matchingPkgJSON) {
       debug('No matching version found for ' + fullNameH(requestedPkg))
 
-      return new Error('no matching version found for ' +
-        fullName(requestedPkg))
+      return Rx.Observable.throw(new Error('no matching version found for ' +
+        fullName(requestedPkg)))
     }
 
     if (matchingPkgJSON.version !== requestedPkg.version) {
@@ -60,17 +60,16 @@ function creaetPackageFetcher (opts) {
         fullNameH(matchingPkgJSON))
     }
 
-    const pkgReader = createPackageReader({
-      pkg: matchingPkgJSON,
-      registry: opts.registry,
-      storagePath,
-    })
-
-    return {
-      fs: pkgReader,
-      json: matchingPkgJSON,
-      isOverriden: false,
-    }
+    return Rx.Observable.fromPromise(downloadPkg({
+        pkg: matchingPkgJSON,
+        registry: opts.registry,
+        storagePath,
+      }))
+      .map(pkgReader => ({
+        fs: pkgReader,
+        json: matchingPkgJSON,
+        isOverriden: false,
+      }))
   }
 }
 
