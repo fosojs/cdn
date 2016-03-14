@@ -1,5 +1,4 @@
 'use strict'
-const Boom = require('boom')
 const mime = require('mime')
 
 module.exports = function (server, opts) {
@@ -34,7 +33,10 @@ module.exports = function (server, opts) {
         result.stream.on('end', () => res.end())
         result.stream.on('error', err => console.error(err))
       })
-      .catch(err => res.send(Boom.notFound(err)))
+      .catch(err => res
+        .status(404)
+        .set('Content-Type', 'text/plain')
+        .send(`Not found: file "${pkg.file}" in package ${pkg.name}@${pkg.version}`))
     },
   })
 }

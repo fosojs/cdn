@@ -1,5 +1,4 @@
 'use strict'
-const Boom = require('boom')
 const plugiator = require('plugiator')
 
 function register (plugin, opts) {
@@ -29,7 +28,10 @@ function register (plugin, opts) {
   const registryMiddleware = (req, res, next) => {
     registryCache.get(req.params.account, function (err, registry) {
       if (err) {
-        return res.send(Boom.notFound('registry not found', err))
+        return res
+          .status(404)
+          .set('Content-Type', 'text/plain')
+          .send('Unknown registry: ' + req.params.account)
       }
 
       req.registry = registry

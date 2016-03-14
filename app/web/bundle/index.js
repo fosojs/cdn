@@ -1,6 +1,5 @@
 'use strict'
 const parseBundleRoute = require('../../utils/parse-bundle-route')
-const Boom = require('boom')
 const uglify = require('uglify-js')
 const CleanCSS = require('clean-css')
 const R = require('ramda')
@@ -102,7 +101,9 @@ exports.register = function (server, opts) {
       bundle.id = req.params.account + '/' + req.params[0]
       bundleCache.get(bundle, (err, result) => {
         if (err || !result || !result.content)
-          return res.send(Boom.notFound(err))
+          return res.status(404)
+            .set('Content-Type', 'text/plain')
+            .send('Not found.')
 
         res
           .set('Content-Type', mime.lookup(req.params[0]))
