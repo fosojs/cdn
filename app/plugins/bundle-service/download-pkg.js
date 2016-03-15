@@ -68,7 +68,12 @@ function downloadPkg (opts) {
       res
         .pipe(zlib.createGunzip())
         .on('error', reject)
-        .pipe(tar.extract(directory))
+        .pipe(tar.extract(directory, {
+            map (header) {
+              header.name = header.name.replace(/^package\//, '')
+              return header
+            },
+          }))
         .on('finish', () => {
           debug('tarball downloaded: ' + chalk.magenta(tarballURL))
           buildFileTree({name, version, directory}, () => {
@@ -80,7 +85,7 @@ function downloadPkg (opts) {
   })
 
   function createPkgReader () {
-    return localPackageReader(path.resolve(directory, 'package'))
+    return localPackageReader(directory)
   }
 
   function getTarballURL () {
