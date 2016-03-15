@@ -54,7 +54,8 @@ function registry (opts) {
   }
 
   function versions (module, version, cb) {
-    regClient.get(opts.url + module.replace('/', '%2f'), {
+    const encodedPackageName = encodePackageName(module)
+    regClient.get(opts.url + encodedPackageName, {
       auth: {
         token: opts.token,
       },
@@ -71,5 +72,12 @@ function registry (opts) {
 
       cb(null, data.versions[v[0]])
     })
+  }
+
+  function encodePackageName (packageName) {
+    if (packageName.charAt(0) === '@') {
+      return `@${encodeURIComponent(packageName.substring(1))}`
+    }
+    return encodeURIComponent(packageName)
   }
 }
