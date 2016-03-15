@@ -83,7 +83,7 @@ exports.register = function (server, opts) {
             ),
           })
         })
-        .catch(err => next(null, null))
+        .catch(err => next(err))
     },
     generateTimeout: 1000 * 10, // 10 seconds
   })
