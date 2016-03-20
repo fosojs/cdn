@@ -15,14 +15,20 @@ exports.register = function (server, opts) {
     return new Error('opts.resourcesHost is required')
   }
 
+  function wrapPkgFiles (pkgFiles) {
+    return `;cdn.packages[${JSON.stringify(pkgFiles.name)}]=` +
+      `{version:${JSON.stringify(pkgFiles.version)}};` +
+      pkgFiles.files.join(';')
+  }
+
   function bundleJavaScript (type, pkgFiles) {
     const bundleHeader = 'window.cdn=window.cdn||{};' +
-      'cdn.packages=cdn.packages||{};cdn.origin="' + opts.resourcesHost + '"'
-    return pkgFiles.reduce(function (memo, pkgFiles) {
-      return memo + ';cdn.packages["' + pkgFiles.name +
-        '"]={version:"' + pkgFiles.version + '"};' +
-        pkgFiles.files.join(';')
-    }, bundleHeader)
+      'cdn.packages=cdn.packages||{};cdn.origin=' +
+      JSON.stringify(opts.resourcesHost)
+    return R.compose(
+      R.reduce(R.concat, bundleHeader),
+      R.map(wrapPkgFiles)
+    )(pkgFiles)
   }
 
   function bundleCSS (type, pkgFiles) {
