@@ -2,7 +2,7 @@
 const describe = require('mocha').describe
 const it = require('mocha').it
 const expect = require('chai').expect
-const downloadPkg = require('../../../app/plugins/bundle-service/download-pkg')
+const downloadPkg = require('./download-pkg')
 const path = require('path')
 
 describe('Package', function () {
@@ -15,7 +15,7 @@ describe('Package', function () {
       registry: {
         url: 'http://registry.npmjs.org/',
       },
-      storagePath: path.resolve(__dirname, '../../../.cdn-cache'),
+      storagePath: path.resolve(process.cwd(), './.cdn-cache'),
     })
     .then((pkg) => {
       return pkg.readFile('./lib/bar.js')
@@ -38,7 +38,7 @@ describe('Package', function () {
       registry: {
         url: 'http://registry.npmjs.org/',
       },
-      storagePath: path.resolve(__dirname, '../../../.cdn-cache'),
+      storagePath: path.resolve(process.cwd(), './.cdn-cache'),
     })
     .then((pkg) => {
       return pkg.readFile('./bla-bla.js')
@@ -59,7 +59,7 @@ describe('Package', function () {
       registry: {
         url: 'http://registry.npmjs.org/',
       },
-      storagePath: path.resolve(__dirname, '../../../.cdn-cache'),
+      storagePath: path.resolve(process.cwd(), './.cdn-cache'),
     })
     .then((pkg) => {
       return pkg.readFile('./lib/bar.js')

@@ -2,7 +2,7 @@
 const describe = require('mocha').describe
 const it = require('mocha').it
 const expect = require('chai').expect
-const parseBundleRoute = require('../../app/utils/parse-bundle-route')
+const parseBundleRoute = require('./parse-bundle-route')
 
 describe('parse package url', function () {
   it('should parse one package with version', function () {

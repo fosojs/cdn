@@ -2,7 +2,7 @@
 const describe = require('mocha').describe
 const it = require('mocha').it
 const expect = require('chai').expect
-const fullCssUrl = require('../../app/utils/full-css-url')
+const fullCssUrl = require('./full-css-url')
 
 describe('full css urls', function () {
   it('should replace relative URL', function () {

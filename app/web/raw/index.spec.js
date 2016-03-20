@@ -4,10 +4,10 @@ const it = require('mocha').it
 const expect = require('chai').expect
 const express = require('express')
 const hexi = require('hexi')
-const createBundleService = require('../../app/plugins/bundle-service')
-const raw = require('../../app/web/raw')
-const compareToFile = require('./compare-to-file')
-const registry = require('../../app/plugins/registry')
+const createBundleService = require('../../plugins/bundle-service')
+const raw = require('.')
+const compareToFile = require('../test/compare-to-file')
+const registry = require('../../plugins/registry')
 const path = require('path')
 const plugiator = require('plugiator')
 const request = require('supertest')
@@ -20,7 +20,7 @@ describe('raw', function () {
       maxAge: {
         'default': '4h',
       },
-      storagePath: path.resolve(__dirname, '../../.cdn-cache'),
+      storagePath: path.resolve(process.cwd(), './.cdn-cache'),
     })
 
     server.register([
@@ -66,7 +66,7 @@ describe('raw', function () {
       maxAge: {
         'default': '4h',
       },
-      storagePath: path.resolve(__dirname, '../../.cdn-cache'),
+      storagePath: path.resolve(process.cwd(), './.cdn-cache'),
     })
 
     return server.register([

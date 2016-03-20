@@ -3,7 +3,7 @@ const describe = require('mocha').describe
 const it = require('mocha').it
 const expect = require('chai').expect
 
-const getMainFile = require('../../../app/plugins/bundle-service/get-main-file')
+const getMainFile = require('./get-main-file')
 
 describe('getMainFile', () => {
   describe('js', () => {

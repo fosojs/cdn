@@ -5,10 +5,10 @@ const expect = require('chai').expect
 const express = require('express')
 const hexi = require('hexi')
 const R = require('ramda')
-const createBundleService = require('../../app/plugins/bundle-service')
-const bundle = require('../../app/web/bundle')
-const registry = require('../../app/plugins/registry')
-const compareToFile = require('./compare-to-file')
+const createBundleService = require('../../plugins/bundle-service')
+const bundle = require('.')
+const registry = require('../../plugins/registry')
+const compareToFile = require('../test/compare-to-file')
 const path = require('path')
 const decamelize = require('decamelize')
 const plugiator = require('plugiator')
@@ -158,7 +158,7 @@ const tests = [
   {
     name: 'should bundle local package',
     path: '/bundle/local-pkg@1.0.0(index).js',
-    overridePath: path.resolve(__dirname, './local-pkg'),
+    overridePath: path.resolve(__dirname, '../test/local-pkg'),
     expected: {
       fileName: 'test6',
       headers: {
@@ -181,7 +181,7 @@ describe('bundle', function () {
       const bundleService = createBundleService({
         maxAge: test.maxAge,
         overridePath: test.overridePath,
-        storagePath: path.resolve(__dirname, '../../.cdn-cache'),
+        storagePath: path.resolve(process.cwd(), './.cdn-cache'),
       })
 
       return server

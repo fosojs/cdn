@@ -2,7 +2,7 @@
 const describe = require('mocha').describe
 const it = require('mocha').it
 const expect = require('chai').expect
-const createRegistry = require('../../../app/plugins/bundle-service/registry')
+const createRegistry = require('./registry')
 
 describe('Registry', function () {
   it('should resolve version', function (done) {
