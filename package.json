@@ -78,7 +78,7 @@
     "normalize-path": "^2.0.1",
     "npm-registry-client": "^7.0.9",
     "plugiator": "^0.1.1",
-    "ramda": "^0.21.0",
+    "ramda": "^0.22.0",
     "rx": "^4.1.0",
     "semver": "^5.1.0",
     "stream-to-string": "^1.0.1",
