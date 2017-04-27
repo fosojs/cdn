@@ -76,7 +76,7 @@
     "hexi-cache": "0.0.2",
     "mime": "^1.3.4",
     "normalize-path": "^2.0.1",
-    "npm-registry-client": "^7.0.9",
+    "npm-registry-client": "^8.3.0",
     "plugiator": "^0.1.1",
     "ramda": "^0.21.0",
     "rx": "^4.1.0",
