@@ -1,6 +1,8 @@
 <!--email_off-->
 # foso-cdn
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/fosojs/cdn.svg)](https://greenkeeper.io/)
+
 A webservice that dishes out files from npm packages.
 
 Inspired by [npm-cdn](https://github.com/zeke/npm-cdn),
