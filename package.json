@@ -69,7 +69,7 @@
     "css-url-rewrite": "^0.9.0",
     "debug": "^2.2.0",
     "duration-js": "^3.5.1",
-    "express": "^4.13.4",
+    "express": "^4.15.3",
     "findit": "^2.0.0",
     "handlebars": "^4.0.5",
     "hexi": "^0.8.0",
